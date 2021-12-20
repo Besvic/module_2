@@ -1,5 +1,6 @@
 package com.epam.esm.controller;
 
+import com.epam.esm.config.LocalizedException;
 import com.epam.esm.dao.exception.DaoException;
 import com.epam.esm.entity.CustomResponse;
 import com.epam.esm.exception.ControllerException;
@@ -18,6 +19,7 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
@@ -54,7 +56,7 @@ public class DefaultAdvice extends ResponseEntityExceptionHandler {
                 .stream()
                 .map(x -> x.getDefaultMessage())
                 .collect(Collectors.toList());
-        CustomResponse response = new CustomResponse(status.toString(), "Request isn't valid", errors);
+        CustomResponse response = new CustomResponse(status.toString(), /*"Request isn't valid"*/ new LocalizedException("exception", Locale.ENGLISH).getLocalizedMessage(), errors);
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 

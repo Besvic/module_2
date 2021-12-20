@@ -6,10 +6,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Locale;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
+//@AllArgsConstructor
 public class CustomResponse {
 
     private String errorCode;
@@ -20,5 +21,11 @@ public class CustomResponse {
     public CustomResponse(String errorCode, String message) {
         this.errorCode = errorCode;
         this.message = message;
+    }
+
+    public CustomResponse(String errorCode, String message, List<String> error) {
+        this.errorCode = errorCode;
+        this.message = message;
+        this.error = error;
     }
 }

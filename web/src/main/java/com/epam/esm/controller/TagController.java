@@ -1,6 +1,9 @@
 package com.epam.esm.controller;
 
+import com.epam.esm.dao.exception.DaoException;
 import com.epam.esm.entity.Tag;
+import com.epam.esm.exception.ControllerException;
+import com.epam.esm.exception.ServiceException;
 import com.epam.esm.service.TagService;
 import com.google.gson.Gson;
 import org.springframework.http.HttpStatus;
@@ -23,29 +26,47 @@ public class TagController {
     }
 
     @GetMapping()
-    public ResponseEntity<List<Tag>> findAll(){
-        List<Tag> tagList = tagService.findAll();
+    public ResponseEntity<List<Tag>> findAll() throws ControllerException {
+        List<Tag> tagList = null;
+        try {
+            tagList = tagService.findAll();
+        } catch (ServiceException e) {
+            throw new ControllerException(e);
+        }
         return tagList.isEmpty() ? ResponseEntity.notFound().build() :
                 ResponseEntity.status(HttpStatus.FOUND).body(tagList);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Tag> findById(@PathVariable long id){
-        Optional<Tag> tag = tagService.findById(id);
+    public ResponseEntity<Tag> findById(@PathVariable long id) throws ControllerException {
+        Optional<Tag> tag = null;
+        try {
+            tag = tagService.findById(id);
+        } catch (ServiceException e) {
+            throw new ControllerException(e);
+        }
         return tag.map(value -> ResponseEntity.status(HttpStatus.OK).body(value)).
                 orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping()
-    public ResponseEntity.BodyBuilder create(@RequestBody Tag tag){
-        return tagService.create(tag) ? ResponseEntity.status(HttpStatus.OK) :
-                ResponseEntity.status(HttpStatus.NO_CONTENT);
+    public ResponseEntity.BodyBuilder create(@RequestBody Tag tag) throws ControllerException {
+        try {
+            return tagService.create(tag) ? ResponseEntity.status(HttpStatus.OK) :
+                    ResponseEntity.status(HttpStatus.NO_CONTENT);
+        } catch (ServiceException e) {
+            throw new ControllerException(e);
+        }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity.BodyBuilder remove(@PathVariable long id){
-        return tagService.removeById(id) ? ResponseEntity.status(HttpStatus.OK) :
-                ResponseEntity.status(HttpStatus.NO_CONTENT);
+    public ResponseEntity.BodyBuilder remove(@PathVariable long id) throws ControllerException {
+        try {
+            return tagService.removeById(id) ? ResponseEntity.status(HttpStatus.OK) :
+                    ResponseEntity.status(HttpStatus.NO_CONTENT);
+        } catch (ServiceException e) {
+            throw new ControllerException(e);
+        }
     }
 
 

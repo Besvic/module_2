@@ -2,7 +2,7 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
-       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:p="http://www.springframework.org/schema/p"
        xsi:schemaLocation="
 		http://www.springframework.org/schema/beans
     	http://www.springframework.org/schema/beans/spring-beans.xsd
@@ -25,20 +25,20 @@
         <property name="enableSpringELCompiler" value="true"/>
     </bean>
 
-<!--    <bean id="validatorController" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean" />-->
     <mvc:annotation-driven validator="validator" />
 
     <bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean" />
 
-    <!--<bean id="annotationMethodHandlerAdapter" class="org.springframework.web.portlet.mvc.annotation.AnnotationMethodHandlerAdapter">
-        <property name="webBindingInitializer">
-            <bean id="configurableWebBindingInitializer" class="org.springframework.web.bind.support.ConfigurableWebBindingInitializer">
-                <property name="validator">
-                    <ref bean="validator"/>
-                </property>
-            </bean>
-        </property>
-    </bean>-->
+
+<!--    locale-->
+    <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource"
+          p:basename="messages/messages" p:fallbackToSystemLocale="false" />
+
+    <bean id="localeResolver" class="org.springframework.web.servlet.i18n.SessionLocaleResolver">
+        <property name="defaultLocale" value="en_EN"/>
+    </bean>
+<!--    locale-->
+
     <bean class="org.thymeleaf.spring5.view.ThymeleafViewResolver">
         <property name="templateEngine" ref="templateEngine"/>
         <property name="order" value="1"/>

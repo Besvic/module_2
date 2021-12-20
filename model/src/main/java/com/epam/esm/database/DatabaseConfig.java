@@ -1,57 +1,43 @@
 package com.epam.esm.database;
 
+import org.apache.commons.dbcp.BasicDataSource;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
 
 @Configuration
 @EnableTransactionManagement
+@PropertySource("classpath:database.properties")
+@ComponentScan("com.epam.esm")
 public class DatabaseConfig {
 
-    private static final String DATABASE_PROPERTIES = "database.properties";
-    private static final String DATABASE_URI = "uri";
-    private static final String DATABASE_USER = "user";
-    private static final String DATABASE_PASS = "pass";
-    private static final String DATABASE_DRIVER = "driver";
-    private static final Properties properties = new Properties();
-
-    private static final String URI;
-    private static final String USER;
-    private static final String PASS;
-    private static final String DRIVER_CLASS_NAME;
-
-    static {
-        try(InputStream inputStream = DatabaseConfig.class.getClassLoader().getResourceAsStream(DATABASE_PROPERTIES)){
-            properties.load(inputStream);
-            URI = properties.getProperty(DATABASE_URI);
-            USER = properties.getProperty(DATABASE_USER);
-            PASS = properties.getProperty(DATABASE_PASS);
-            DRIVER_CLASS_NAME = properties.getProperty(DATABASE_DRIVER);
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException("File with properties" + DATABASE_PROPERTIES + " not found: " + e);
-        } catch (IOException e) {
-            throw new RuntimeException("Reading error: " + e);
-        }
-    }
-
+    @Value("${jdbc.uri}")
+    private String URI;
+    @Value("${jdbc.user}")
+    private String USER;
+    @Value("${jdbc.pass}")
+    private String PASS;
+    @Value("${jdbc.driver}")
+    private String DRIVER_CLASS_NAME;
+    @Value("${jdbc.pool.size}")
+    private String POOL_SIZE;
 
     @Bean
     public DataSource dateSource(){
-        DriverManagerDataSource dataSource = new DriverManagerDataSource();
+        BasicDataSource dataSource = new BasicDataSource();
         dataSource.setDriverClassName(DRIVER_CLASS_NAME);
         dataSource.setUrl(URI);
         dataSource.setUsername(USER);
         dataSource.setPassword(PASS);
+        //dataSource.setInitialSize(Integer.parseInt(POOL_SIZE));
         return dataSource;
     }
 
@@ -66,4 +52,14 @@ public class DatabaseConfig {
         dataSourceTransactionManager.setDataSource(dataSource);
         return dataSourceTransactionManager;
     }
+
+    /*@Bean
+    public MessageSource messageSource() {
+        ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
+        messageSource.setBasename("classpath:messages");
+        messageSource.setDefaultEncoding("UTF-8");
+        return messageSource;
+    }*/
+
+
 }

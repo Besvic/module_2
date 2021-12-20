@@ -10,19 +10,19 @@ import java.util.Optional;
 
 public interface GiftCertificateDao {
 
-    List<GiftCertificate> findAll();
-    List<GiftCertificate> findAllCertificateByTagName(String tagName);
-    List<GiftCertificate> findAllCertificateByNameOrDescription(String name, String description);
-    List<GiftCertificate> findAllCertificateByDate(String type);
-    List<GiftCertificate> findAllCertificateByName(String type);
+    List<GiftCertificate> findAll() throws DaoException;
+    List<GiftCertificate> findAllCertificateByTagName(String tagName) throws DaoException;
+    List<GiftCertificate> findAllCertificateByNameOrDescription(String name, String description) throws DaoException;
+    List<GiftCertificate> findAllCertificateByDate(String type) throws DaoException;
+    List<GiftCertificate> findAllCertificateByName(String type) throws DaoException;
     Optional<GiftCertificate> findById(long id) throws DaoException;
-    long create(GiftCertificate giftCertificate);
-    boolean updateNameById(String name, long id);
-    boolean updateDescriptionById(String description, long id);
-    boolean updateDurationById(int duration, long id);
-    boolean updatePriceById(double price, long id);
-    boolean updateLastUpdateDateById(long id);
-    boolean removeById(long id);
+    long create(GiftCertificate giftCertificate) throws DaoException;
+    boolean updateNameById(String name, long id) throws DaoException;
+    boolean updateDescriptionById(String description, long id) throws DaoException;
+    boolean updateDurationById(int duration, long id) throws DaoException;
+    boolean updatePriceById(double price, long id) throws DaoException;
+    boolean updateLastUpdateDateById(long id) throws DaoException;
+    boolean removeById(long id) throws DaoException;
 
 
 }

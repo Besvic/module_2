@@ -1,3 +1,4 @@
+/*
 package com.epam.esm.config;
 
 import org.springframework.context.MessageSource;
@@ -16,3 +17,4 @@ public class MessageConfig {
         return source;
     }
 }
+*/

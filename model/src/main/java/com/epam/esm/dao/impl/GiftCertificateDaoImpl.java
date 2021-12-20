@@ -1,24 +1,30 @@
 package com.epam.esm.dao.impl;
 
+import com.epam.esm.config.Messages;
 import com.epam.esm.dao.GiftCertificateDao;
 import com.epam.esm.dao.exception.DaoException;
 import com.epam.esm.entity.GiftCertificate;
 import com.google.protobuf.ServiceException;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.servlet.LocaleResolver;
 
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+
+import static com.epam.esm.config.Messages.getMessageForLocale;
 
 @Repository
 public class GiftCertificateDaoImpl implements GiftCertificateDao {
@@ -105,6 +111,7 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
 
     private final JdbcTemplate jdbcTemplate;
 
+
     @Autowired
     public GiftCertificateDaoImpl(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -146,7 +153,7 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
         if (giftCertificate.isPresent()){
             return giftCertificate;
         }
-        throw new DaoException("Not find certificate with id: " + id);
+        throw new DaoException(getMessageForLocale("certificate.not.found.by.id") + id);
     }
 
     @Override

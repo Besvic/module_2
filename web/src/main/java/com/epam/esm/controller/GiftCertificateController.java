@@ -1,5 +1,6 @@
 package com.epam.esm.controller;
 
+import com.epam.esm.config.Messages;
 import com.epam.esm.entity.CustomResponse;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
@@ -16,7 +17,10 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
+
+import static com.epam.esm.config.Messages.getMessageForLocale;
 
 @Validated
 @RestController
@@ -33,8 +37,13 @@ public class GiftCertificateController {
     }
 
     @GetMapping()
-    public ResponseEntity<List<GiftCertificate>> findAll(){
-        List<GiftCertificate> giftCertificateList = giftCertificateService.findAll();
+    public ResponseEntity<List<GiftCertificate>> findAll() throws ControllerException {
+        List<GiftCertificate> giftCertificateList;
+        try {
+            giftCertificateList = giftCertificateService.findAll();
+        } catch (ServiceException e) {
+            throw new ControllerException(e);
+        }
         return giftCertificateList.isEmpty() ? ResponseEntity.status(HttpStatus.NO_CONTENT).build() :
                 ResponseEntity.status(HttpStatus.OK).body(giftCertificateList);
     }
@@ -53,8 +62,13 @@ public class GiftCertificateController {
     }
 
     @GetMapping(value = "/searchByTagName")
-    public ResponseEntity<List<GiftCertificate>> findAllCertificateByTagName(@RequestBody @Valid Tag tag){
-        List<GiftCertificate> giftCertificateList = giftCertificateService.findAllCertificateByTagName(tag.getName());
+    public ResponseEntity<List<GiftCertificate>> findAllCertificateByTagName(@RequestBody @Valid Tag tag) throws ControllerException {
+        List<GiftCertificate> giftCertificateList;
+        try {
+            giftCertificateList = giftCertificateService.findAllCertificateByTagName(tag.getName());
+        } catch (ServiceException e) {
+            throw new ControllerException(e);
+        }
         return giftCertificateList.isEmpty() ? ResponseEntity.status(HttpStatus.NO_CONTENT).build() :
                 ResponseEntity.status(HttpStatus.OK).body(giftCertificateList);
     }
@@ -62,55 +76,71 @@ public class GiftCertificateController {
     @GetMapping(value = "/searchByNameOrDescription")
     public ResponseEntity<List<GiftCertificate>> findAllCertificateByNameOrDescription(
             @RequestParam(value = "name", defaultValue = "-") String name,
-            @RequestParam(value = "description", defaultValue = "-") String description){
-        List<GiftCertificate> giftCertificateList =
-                giftCertificateService.findAllCertificateByNameOrDescription(name, description);
+            @RequestParam(value = "description", defaultValue = "-") String description) throws ControllerException {
+        List<GiftCertificate> giftCertificateList;
+        try {
+            giftCertificateList = giftCertificateService.findAllCertificateByNameOrDescription(name, description);
+        } catch (ServiceException e) {
+            throw new ControllerException(e);
+        }
         return giftCertificateList.isEmpty() ? ResponseEntity.status(HttpStatus.NO_CONTENT).build() :
                 ResponseEntity.status(HttpStatus.OK).body(giftCertificateList);
     }
 
-    // TODO: 13.12.2021 add handling exception
+    @GetMapping("/locale")
+    public ResponseEntity<String> changeLocale(@RequestParam("type") String locale){
+        Messages.setLocale(locale.equalsIgnoreCase(Locale.US.toString()) ?
+                Locale.US : new Locale("ru_RU"));
+        return new ResponseEntity<>(getMessageForLocale("locale.change.successful"), HttpStatus.OK);
+    }
+
     @GetMapping("/sort/date/{type}")
-    public ResponseEntity<List<GiftCertificate>> findAllSortedCertificateByDate(@PathVariable("type") String type) throws ServiceException {
+    public ResponseEntity<List<GiftCertificate>> findAllSortedCertificateByDate(@PathVariable("type") String type)
+            throws ServiceException {
        List<GiftCertificate> certificateList = giftCertificateService.findAllCertificateByDate(type);
         return certificateList.isEmpty() ? ResponseEntity.status(HttpStatus.NO_CONTENT).build() :
                 ResponseEntity.status(HttpStatus.OK).body(certificateList);
     }
 
-    // TODO: 13.12.2021 add handling exception
     @GetMapping("/sort/name/{type}")
-    public ResponseEntity<List<GiftCertificate>> findAllSortedCertificateByName(@PathVariable("type") String type) throws ServiceException {
+    public ResponseEntity<List<GiftCertificate>> findAllSortedCertificateByName(@PathVariable("type") String type)
+            throws ServiceException {
         List<GiftCertificate> certificateList = giftCertificateService.findAllCertificateByName(type);
         return certificateList.isEmpty() ? ResponseEntity.status(HttpStatus.NO_CONTENT).build() :
                 ResponseEntity.status(HttpStatus.OK).body(certificateList);
     }
 
     @PostMapping()
-    public ResponseEntity<Object> createGiftCertificate(@Valid @RequestBody GiftCertificate giftCertificate){
-        return giftCertificateService.create(giftCertificate) ? ResponseEntity.status(HttpStatus.OK).build()
-                : ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    public ResponseEntity<Object> createGiftCertificate(@Valid @RequestBody GiftCertificate giftCertificate)
+            throws ControllerException {
+        try {
+            return giftCertificateService.create(giftCertificate) ? ResponseEntity.status(HttpStatus.OK).build()
+                    : ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        } catch (ServiceException e) {
+            throw new ControllerException(e);
+        }
     }
 
-    // TODO: 15.12.2021 del
-  /*  @PostMapping("/test")
-    public ResponseEntity test(@Valid @RequestBody GiftCertificate giftCertificate*//*,
-                                                            @RequestBody ArrayList<Tag> tagList*//*){
-        System.out.println(giftCertificate.toString());
-        return ResponseEntity.status(HttpStatus.OK).build();*/
-
-
     @DeleteMapping(value = "/{id}")
-    public ResponseEntity<Object> removeById(@PathVariable("id") long id){
-        return giftCertificateService.removeById(id) ? ResponseEntity.status(HttpStatus.OK).build() :
-                ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    public ResponseEntity<Object> removeById(@PathVariable("id") long id) throws ControllerException {
+        try {
+            return giftCertificateService.removeById(id) ? ResponseEntity.status(HttpStatus.OK).build() :
+                    ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (ServiceException e) {
+            throw new ControllerException(e);
+        }
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<Object> updateBiId(@PathVariable("id") long id,
-                                             @RequestBody @Valid GiftCertificate giftCertificate){
+                                             @RequestBody @Valid GiftCertificate giftCertificate) throws ControllerException {
         giftCertificate.setId(id);
-        return giftCertificateService.updateById(giftCertificate) ? ResponseEntity.status(HttpStatus.OK).build() :
-        ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        try {
+            return giftCertificateService.updateById(giftCertificate) ? ResponseEntity.status(HttpStatus.OK).build() :
+            ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (ServiceException e) {
+            throw new ControllerException(e);
+        }
     }
 
 

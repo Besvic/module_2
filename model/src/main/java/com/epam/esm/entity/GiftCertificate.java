@@ -26,7 +26,8 @@ public class GiftCertificate implements Serializable {
 
     private long id;
     @NotBlank(message = "Name can not be empty")
-    @Pattern(regexp = "[a-zA-zа-яА-Я\\s]+", message = "Name may contain only letters. You input: ${validatedValue}")
+    @Pattern(regexp = "[a-zA-zа-яА-Я\\s]+", message = /*"Name may contain only letters. You input: ${validatedValue}"*/
+            "{exception}")
     private String name;
     @NotBlank(message = "Description can not be empty")
     @Pattern(regexp = "[a-zA-zа-яА-Я\\s]+", message = "Description may contain only letters. You input: ${validatedValue}")
