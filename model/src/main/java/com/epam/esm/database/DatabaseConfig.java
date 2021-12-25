@@ -10,6 +10,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 
+/**
+ * The type Database config.
+ */
 @Configuration
 @EnableTransactionManagement
 @PropertySource("classpath:database.properties")
@@ -28,6 +31,11 @@ public class DatabaseConfig {
     @Value("${jdbc.pool.size}")
     private String POOL_SIZE;
 
+    /**
+     * Date source data source.
+     *
+     * @return the data source
+     */
     @Bean
     public DataSource dateSource(){
         BasicDataSource dataSource = new BasicDataSource();
@@ -39,11 +47,22 @@ public class DatabaseConfig {
         return dataSource;
     }
 
+    /**
+     * Jdbc template jdbc template.
+     *
+     * @return the jdbc template
+     */
     @Bean
     public JdbcTemplate jdbcTemplate(){
         return new JdbcTemplate(dateSource());
     }
 
+    /**
+     * Gets transaction manager.
+     *
+     * @param dataSource the data source
+     * @return the transaction manager
+     */
     @Bean("transactionManager")
     public PlatformTransactionManager getTransactionManager(DataSource dataSource) {
         DataSourceTransactionManager dataSourceTransactionManager = new DataSourceTransactionManager();

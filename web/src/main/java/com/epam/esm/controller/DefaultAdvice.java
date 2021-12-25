@@ -20,6 +20,9 @@ import java.util.stream.Collectors;
 
 import static com.epam.esm.database.Messages.getMessageForLocale;
 
+/**
+ * The type Default advice.
+ */
 @RestControllerAdvice
 public class DefaultAdvice extends ResponseEntityExceptionHandler {
     @Override
@@ -28,12 +31,24 @@ public class DefaultAdvice extends ResponseEntityExceptionHandler {
     }
 
 
+    /**
+     * Handle service exception response entity.
+     *
+     * @param e the e
+     * @return the response entity
+     */
     @ExceptionHandler(ServiceException.class)
     public ResponseEntity<CustomResponse> handleServiceException(ServiceException e) {
         CustomResponse response = new CustomResponse(HttpStatus.BAD_REQUEST.toString(), e.getMessage());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
+    /**
+     * Handle controller exception response entity.
+     *
+     * @param e the e
+     * @return the response entity
+     */
     @ExceptionHandler(ControllerException.class)
     public ResponseEntity<CustomResponse> handleControllerException(ControllerException e) {
         CustomResponse response = new CustomResponse("40402", e.getMessage());
@@ -58,6 +73,14 @@ public class DefaultAdvice extends ResponseEntityExceptionHandler {
         return new ResponseEntity(response, status);
     }
 
+    /**
+     * Handle method argument type mismatch response entity.
+     *
+     * @param ex      the ex
+     * @param status  the status
+     * @param request the request
+     * @return the response entity
+     */
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     protected ResponseEntity<Object> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex,HttpStatus status,
                                                                       WebRequest request) {
@@ -68,6 +91,13 @@ public class DefaultAdvice extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(response, status);
     }
 
+    /**
+     * Handle all exceptions response entity.
+     *
+     * @param ex      the ex
+     * @param request the request
+     * @return the response entity
+     */
     @ExceptionHandler(Exception.class)
     protected ResponseEntity<Object> handleAllExceptions(Exception ex, WebRequest request) {
         CustomResponse response = new CustomResponse(HttpStatus.INTERNAL_SERVER_ERROR.toString(), ex.getMessage());

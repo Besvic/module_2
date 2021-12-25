@@ -14,12 +14,20 @@ import java.util.Optional;
 
 import static com.epam.esm.database.Messages.getMessageForLocale;
 
+/**
+ * The type Tag service.
+ */
 @Slf4j
 @Service
 public class TagServiceImpl implements TagService {
 
     private final TagDao tagDao;
 
+    /**
+     * Instantiates a new Tag service.
+     *
+     * @param tagDao the tag dao
+     */
     @Autowired
     public TagServiceImpl(TagDao tagDao) {
         this.tagDao = tagDao;

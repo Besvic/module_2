@@ -9,6 +9,9 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
+/**
+ * The type Gift certificate tag dao.
+ */
 @Repository
 public class GiftCertificateTagDaoImpl implements GiftCertificateTagDao {
 
@@ -17,6 +20,11 @@ public class GiftCertificateTagDaoImpl implements GiftCertificateTagDao {
 
     private final JdbcTemplate jdbcTemplate;
 
+    /**
+     * Instantiates a new Gift certificate tag dao.
+     *
+     * @param jdbcTemplate the jdbc template
+     */
     public GiftCertificateTagDaoImpl(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }

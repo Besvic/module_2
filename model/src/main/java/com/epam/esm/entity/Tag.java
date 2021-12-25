@@ -9,6 +9,9 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import java.io.Serializable;
 
+/**
+ * The type Tag.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

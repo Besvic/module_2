@@ -13,6 +13,9 @@ import java.sql.PreparedStatement;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type Tag dao.
+ */
 @Repository
 public class TagDaoImpl implements TagDao {
 
@@ -38,6 +41,11 @@ public class TagDaoImpl implements TagDao {
 
     private final JdbcTemplate jdbcTemplate;
 
+    /**
+     * Instantiates a new Tag dao.
+     *
+     * @param jdbcTemplate the jdbc template
+     */
     @Autowired
     public TagDaoImpl(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;

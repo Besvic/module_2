@@ -20,6 +20,9 @@ import java.util.Optional;
 
 import static com.epam.esm.database.Messages.getMessageForLocale;
 
+/**
+ * The type Gift certificate service.
+ */
 @Slf4j
 @Service
 public class GiftCertificateServiceImpl implements GiftCertificateService {
@@ -29,6 +32,14 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     private  GiftCertificateTagDao giftCertificateTagDao;
     private  CustomValidator customValidator;
 
+    /**
+     * Instantiates a new Gift certificate service.
+     *
+     * @param giftCertificateDao    the gift certificate dao
+     * @param tagDao                the tag dao
+     * @param giftCertificateTagDao the gift certificate tag dao
+     * @param customValidator       the custom validator
+     */
     public GiftCertificateServiceImpl(GiftCertificateDao giftCertificateDao, TagDao tagDao,
                                       GiftCertificateTagDao giftCertificateTagDao, CustomValidator customValidator) {
         this.giftCertificateDao = giftCertificateDao;

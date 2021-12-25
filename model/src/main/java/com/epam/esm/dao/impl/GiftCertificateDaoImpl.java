@@ -21,6 +21,9 @@ import java.util.Optional;
 
 import static com.epam.esm.database.Messages.getMessageForLocale;
 
+/**
+ * The type Gift certificate dao.
+ */
 @Repository
 public class GiftCertificateDaoImpl implements GiftCertificateDao {
 
@@ -105,6 +108,11 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
 
     private final JdbcTemplate jdbcTemplate;
 
+    /**
+     * Instantiates a new Gift certificate dao.
+     *
+     * @param jdbcTemplate the jdbc template
+     */
     @Autowired
     public GiftCertificateDaoImpl(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;

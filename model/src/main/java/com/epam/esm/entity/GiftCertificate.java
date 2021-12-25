@@ -14,6 +14,9 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * The type Gift certificate.
+ */
 @Data
 @Builder
 @NoArgsConstructor
