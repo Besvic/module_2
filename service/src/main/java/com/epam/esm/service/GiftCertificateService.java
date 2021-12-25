@@ -1,6 +1,5 @@
 package com.epam.esm.service;
 
-import com.epam.esm.dao.exception.DaoException;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.exception.ServiceException;
 

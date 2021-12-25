@@ -14,19 +14,16 @@ import javax.sql.DataSource;
 @EnableTransactionManagement
 @PropertySource("classpath:database.properties")
 @ComponentScan("com.epam.esm")
-@Profile({"prod"})
-public class DatabaseConfig {
-
-    @Value("${jdbc.uri}")
+@Profile({"test"})
+public class H2DatabaseConfig {
+    @Value("${url}")
     private String URI;
-    @Value("${jdbc.user}")
+    @Value("${user}")
     private String USER;
-    @Value("${jdbc.pass}")
+    @Value("${password}")
     private String PASS;
-    @Value("${jdbc.driver}")
+    @Value("${driverClassName}")
     private String DRIVER_CLASS_NAME;
-    @Value("${jdbc.pool.size}")
-    private String POOL_SIZE;
 
     @Bean
     public DataSource dateSource(){
@@ -35,7 +32,6 @@ public class DatabaseConfig {
         dataSource.setUrl(URI);
         dataSource.setUsername(USER);
         dataSource.setPassword(PASS);
-        dataSource.setInitialSize(Integer.parseInt(POOL_SIZE));
         return dataSource;
     }
 

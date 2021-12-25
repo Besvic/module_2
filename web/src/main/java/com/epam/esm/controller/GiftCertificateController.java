@@ -1,13 +1,11 @@
 package com.epam.esm.controller;
 
-import com.epam.esm.config.Messages;
-import com.epam.esm.entity.CustomResponse;
+import com.epam.esm.database.Messages;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ControllerException;
 import com.epam.esm.exception.ServiceException;
 import com.epam.esm.service.GiftCertificateService;
-import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -20,7 +18,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
-import static com.epam.esm.config.Messages.getMessageForLocale;
+import static com.epam.esm.database.Messages.getMessageForLocale;
 
 @Validated
 @RestController

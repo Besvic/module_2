@@ -1,7 +1,4 @@
 package com.epam.esm.controller;
-
-import com.epam.esm.config.LocalizedException;
-import com.epam.esm.dao.exception.DaoException;
 import com.epam.esm.entity.CustomResponse;
 import com.epam.esm.exception.ControllerException;
 import com.epam.esm.exception.ServiceException;
@@ -10,7 +7,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
@@ -18,9 +14,11 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.stream.Collectors;
+
+import static com.epam.esm.database.Messages.getMessageForLocale;
 
 @RestControllerAdvice
 public class DefaultAdvice extends ResponseEntityExceptionHandler {
@@ -38,16 +36,9 @@ public class DefaultAdvice extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(ControllerException.class)
     public ResponseEntity<CustomResponse> handleControllerException(ControllerException e) {
-        CustomResponse response = new CustomResponse("404", e.getMessage());
+        CustomResponse response = new CustomResponse("40402", e.getMessage());
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
-
-   /* @ExceptionHandler(NoHandlerFoundException.class)
-    public ResponseEntity<CustomResponse> handleDaoException(NoHandlerFoundException e) {
-        CustomResponse response = new CustomResponse(HttpStatus.NOT_FOUND.toString(), e.getMessage());
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-    }*/
-
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
@@ -56,14 +47,14 @@ public class DefaultAdvice extends ResponseEntityExceptionHandler {
                 .stream()
                 .map(x -> x.getDefaultMessage())
                 .collect(Collectors.toList());
-        CustomResponse response = new CustomResponse(status.toString(), /*"Request isn't valid"*/ new LocalizedException("exception", Locale.ENGLISH).getLocalizedMessage(), errors);
+        CustomResponse response = new CustomResponse(status.toString(), getMessageForLocale("request.isn't.valid") , errors);
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
                                                                   HttpHeaders headers, HttpStatus status, WebRequest request) {
-        CustomResponse response = new CustomResponse("Malformed JSON Request", ex.getMessage());
+        CustomResponse response = new CustomResponse(getMessageForLocale("incorrect.json"), ex.getMessage());
         return new ResponseEntity(response, status);
     }
 
@@ -71,9 +62,9 @@ public class DefaultAdvice extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex,HttpStatus status,
                                                                       WebRequest request) {
         CustomResponse response = new CustomResponse();
-        response.setMessage(String.format("The parameter '%s' of value '%s' could not be converted to type '%s'",
-                ex.getName(), ex.getValue(), ex.getRequiredType().getSimpleName()));
-        response.setErrorCode(ex.getMessage());
+        response.setMessage(getMessageForLocale("mismatch.exception.handler") + ex.getRequiredType().getSimpleName());
+        response.setError(Collections.singletonList(ex.getMessage()));
+        response.setErrorCode("4002");
         return new ResponseEntity<>(response, status);
     }
 
@@ -82,7 +73,4 @@ public class DefaultAdvice extends ResponseEntityExceptionHandler {
         CustomResponse response = new CustomResponse(HttpStatus.INTERNAL_SERVER_ERROR.toString(), ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
-
-    /*@ExceptionHandler()
-    public ResponseEntity*/
 }

@@ -1,11 +1,9 @@
 package com.epam.esm.controller;
 
-import com.epam.esm.dao.exception.DaoException;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ControllerException;
 import com.epam.esm.exception.ServiceException;
 import com.epam.esm.service.TagService;
-import com.google.gson.Gson;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -68,9 +66,4 @@ public class TagController {
             throw new ControllerException(e);
         }
     }
-
-
-
-
-
 }

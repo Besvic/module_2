@@ -2,8 +2,6 @@ package com.epam.esm.dao;
 
 import com.epam.esm.dao.exception.DaoException;
 import com.epam.esm.entity.GiftCertificate;
-import com.epam.esm.entity.Tag;
-import com.google.protobuf.ServiceException;
 
 import java.util.List;
 import java.util.Optional;

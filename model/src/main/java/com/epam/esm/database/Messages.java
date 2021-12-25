@@ -1,4 +1,4 @@
-package com.epam.esm.config;
+package com.epam.esm.database;
 
 import java.util.Locale;
 import java.util.ResourceBundle;

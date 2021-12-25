@@ -1,30 +1,25 @@
 package com.epam.esm.dao.impl;
 
-import com.epam.esm.config.Messages;
 import com.epam.esm.dao.GiftCertificateDao;
 import com.epam.esm.dao.exception.DaoException;
 import com.epam.esm.entity.GiftCertificate;
-import com.google.protobuf.ServiceException;
-import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.servlet.LocaleResolver;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
-import static com.epam.esm.config.Messages.getMessageForLocale;
+import static com.epam.esm.database.Messages.getMessageForLocale;
 
 @Repository
 public class GiftCertificateDaoImpl implements GiftCertificateDao {
@@ -108,9 +103,7 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
             "where status = 'active' and (name like ? or description like ?)\n" +
             "order by name;";
 
-
     private final JdbcTemplate jdbcTemplate;
-
 
     @Autowired
     public GiftCertificateDaoImpl(JdbcTemplate jdbcTemplate) {
@@ -145,7 +138,6 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
                 new BeanPropertyRowMapper<>(GiftCertificate.class));
     }
 
-    // TODO: 16.12.2021 handle exception when object not found 
     @Override
     public Optional<GiftCertificate> findById(long id) throws DaoException {
         Optional<GiftCertificate> giftCertificate = jdbcTemplate.query(SQL_FIND_BY_ID,

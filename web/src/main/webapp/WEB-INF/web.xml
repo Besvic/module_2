@@ -17,7 +17,10 @@
   </init-param>
   <load-on-startup>1</load-on-startup>
 </servlet>
-
+  <context-param>
+    <param-name>spring.profiles.active</param-name>
+    <param-value>prod</param-value>
+  </context-param>
 <servlet-mapping>
   <servlet-name>dispatcher</servlet-name>
   <url-pattern>/app/*</url-pattern>

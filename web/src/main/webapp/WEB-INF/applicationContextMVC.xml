@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
+<beans
+        xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:p="http://www.springframework.org/schema/p"
@@ -28,16 +29,6 @@
     <mvc:annotation-driven validator="validator" />
 
     <bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean" />
-
-
-<!--    locale-->
-    <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource"
-          p:basename="messages/messages" p:fallbackToSystemLocale="false" />
-
-    <bean id="localeResolver" class="org.springframework.web.servlet.i18n.SessionLocaleResolver">
-        <property name="defaultLocale" value="en_EN"/>
-    </bean>
-<!--    locale-->
 
     <bean class="org.thymeleaf.spring5.view.ThymeleafViewResolver">
         <property name="templateEngine" ref="templateEngine"/>

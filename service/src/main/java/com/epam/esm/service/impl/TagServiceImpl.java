@@ -2,7 +2,6 @@ package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.TagDao;
 import com.epam.esm.dao.exception.DaoException;
-import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ServiceException;
 import com.epam.esm.service.TagService;
@@ -13,7 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
-import static com.epam.esm.config.Messages.getMessageForLocale;
+import static com.epam.esm.database.Messages.getMessageForLocale;
 
 @Slf4j
 @Service
