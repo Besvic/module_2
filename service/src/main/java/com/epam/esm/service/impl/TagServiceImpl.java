@@ -6,13 +6,12 @@ import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ServiceException;
 import com.epam.esm.service.TagService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
-import static com.epam.esm.database.Messages.getMessageForLocale;
+import static com.epam.esm.config.LocalizedMessage.getMessageForLocale;
 
 /**
  * The type Tag service.
@@ -28,7 +27,6 @@ public class TagServiceImpl implements TagService {
      *
      * @param tagDao the tag dao
      */
-    @Autowired
     public TagServiceImpl(TagDao tagDao) {
         this.tagDao = tagDao;
     }

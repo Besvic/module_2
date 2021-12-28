@@ -8,7 +8,7 @@ import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ServiceException;
 import com.epam.esm.service.GiftCertificateService;
-import com.epam.esm.validator.CustomValidator;
+import com.epam.esm.validator.GiftCertificateValidator;
 import lombok.extern.slf4j.Slf4j;
 import lombok.var;
 import org.springframework.stereotype.Service;
@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static com.epam.esm.database.Messages.getMessageForLocale;
+import static com.epam.esm.config.LocalizedMessage.getMessageForLocale;
 
 /**
  * The type Gift certificate service.
@@ -27,10 +27,10 @@ import static com.epam.esm.database.Messages.getMessageForLocale;
 @Service
 public class GiftCertificateServiceImpl implements GiftCertificateService {
 
-    private GiftCertificateDao giftCertificateDao;
-    private  TagDao tagDao;
-    private  GiftCertificateTagDao giftCertificateTagDao;
-    private  CustomValidator customValidator;
+    private final GiftCertificateDao giftCertificateDao;
+    private final TagDao tagDao;
+    private final GiftCertificateTagDao giftCertificateTagDao;
+    private final GiftCertificateValidator giftCertificateValidator;
 
     /**
      * Instantiates a new Gift certificate service.
@@ -38,14 +38,14 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
      * @param giftCertificateDao    the gift certificate dao
      * @param tagDao                the tag dao
      * @param giftCertificateTagDao the gift certificate tag dao
-     * @param customValidator       the custom validator
+     * @param giftCertificateValidator       the custom validator
      */
     public GiftCertificateServiceImpl(GiftCertificateDao giftCertificateDao, TagDao tagDao,
-                                      GiftCertificateTagDao giftCertificateTagDao, CustomValidator customValidator) {
+                                      GiftCertificateTagDao giftCertificateTagDao, GiftCertificateValidator giftCertificateValidator) {
         this.giftCertificateDao = giftCertificateDao;
         this.tagDao = tagDao;
         this.giftCertificateTagDao = giftCertificateTagDao;
-        this.customValidator = customValidator;
+        this.giftCertificateValidator = giftCertificateValidator;
     }
 
     private List<GiftCertificate> checkValueListGiftCertificate(List<GiftCertificate> certificateList)
@@ -70,7 +70,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     }
 
     private void checkType(String type) throws ServiceException {
-        if (!customValidator.isSortedType(type)) {
+        if (!giftCertificateValidator.isSortedType(type)) {
             log.warn(getMessageForLocale("certificate.incorrect.type.sort"));
             throw new ServiceException(getMessageForLocale("certificate.incorrect.type.sort"));
         }

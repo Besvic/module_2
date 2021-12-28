@@ -18,13 +18,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.epam.esm.database.Messages.getMessageForLocale;
+import static com.epam.esm.config.LocalizedMessage.getMessageForLocale;
 
 /**
  * The type Default advice.
  */
 @RestControllerAdvice
-public class DefaultAdvice extends ResponseEntityExceptionHandler {
+public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     @Override
     protected ResponseEntity<Object> handleNoHandlerFoundException(NoHandlerFoundException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
         return super.handleNoHandlerFoundException(ex, headers, status, request);

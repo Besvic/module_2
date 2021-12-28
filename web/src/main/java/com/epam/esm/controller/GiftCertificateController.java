@@ -1,12 +1,11 @@
 package com.epam.esm.controller;
 
-import com.epam.esm.database.Messages;
+import com.epam.esm.config.LocalizedMessage;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ControllerException;
 import com.epam.esm.exception.ServiceException;
 import com.epam.esm.service.GiftCertificateService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +17,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
-import static com.epam.esm.database.Messages.getMessageForLocale;
+import static com.epam.esm.config.LocalizedMessage.getMessageForLocale;
 
 /**
  * The type Gift certificate controller.
@@ -37,7 +36,6 @@ public class GiftCertificateController {
      *
      * @param giftCertificateService the gift certificate service
      */
-    @Autowired
     public GiftCertificateController(GiftCertificateService giftCertificateService) {
         this.giftCertificateService = giftCertificateService;
     }
@@ -87,7 +85,7 @@ public class GiftCertificateController {
      * @return the response entity
      * @throws ControllerException the controller exception
      */
-    @GetMapping(value = "/searchByTagName")
+    @GetMapping(value = "/search/by/tag/name")
     public ResponseEntity<List<GiftCertificate>> findAllCertificateByTagName(@RequestBody @Valid Tag tag) throws ControllerException {
         List<GiftCertificate> giftCertificateList;
         try {
@@ -107,7 +105,7 @@ public class GiftCertificateController {
      * @return the response entity
      * @throws ControllerException the controller exception
      */
-    @GetMapping(value = "/searchByNameOrDescription")
+    @GetMapping(value = "/search/by/name/description")
     public ResponseEntity<List<GiftCertificate>> findAllCertificateByNameOrDescription(
             @RequestParam(value = "name", defaultValue = "-") String name,
             @RequestParam(value = "description", defaultValue = "-") String description) throws ControllerException {
@@ -129,7 +127,7 @@ public class GiftCertificateController {
      */
     @GetMapping("/locale")
     public ResponseEntity<String> changeLocale(@RequestParam("type") String locale){
-        Messages.setLocale(locale.equalsIgnoreCase(Locale.US.toString()) ?
+        LocalizedMessage.setLocale(locale.equalsIgnoreCase(Locale.US.toString()) ?
                 Locale.US : new Locale("ru_RU"));
         return new ResponseEntity<>(getMessageForLocale("locale.change.successful"), HttpStatus.OK);
     }

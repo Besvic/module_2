@@ -1,12 +1,11 @@
 package com.epam.esm.validator;
 
-import org.springframework.stereotype.Service;
-
+import org.springframework.stereotype.Component;
 /**
  * The type Custom validator.
  */
-@Service
-public class CustomValidator {
+@Component
+public class GiftCertificateValidator {
 
     private static final String ASC = "asc";
     private static final String DESC = "desc";

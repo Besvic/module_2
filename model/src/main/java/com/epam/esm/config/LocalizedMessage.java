@@ -1,4 +1,4 @@
-package com.epam.esm.database;
+package com.epam.esm.config;
 
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -7,7 +7,10 @@ import java.util.ResourceBundle;
 /**
  * The type Messages.
  */
-public class Messages {
+public final class LocalizedMessage {
+
+    private LocalizedMessage() {
+    }
 
     private static Locale locale = Locale.US;
 
@@ -23,20 +26,11 @@ public class Messages {
     }
 
     /**
-     * Gets locale.
-     *
-     * @return the locale
-     */
-    public static Locale getLocale() {
-        return locale;
-    }
-
-    /**
      * Sets locale.
      *
      * @param locale the locale
      */
     public static void setLocale(Locale locale) {
-        Messages.locale = locale;
+        LocalizedMessage.locale = locale;
     }
 }

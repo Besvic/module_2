@@ -1,4 +1,4 @@
-package com.epam.esm.database;
+package com.epam.esm.config;
 
 import org.apache.commons.dbcp.BasicDataSource;
 import org.springframework.beans.factory.annotation.Value;

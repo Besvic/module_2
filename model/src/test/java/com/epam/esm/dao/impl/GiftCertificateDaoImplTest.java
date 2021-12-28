@@ -1,7 +1,7 @@
 package com.epam.esm.dao.impl;
 
 import com.epam.esm.dao.exception.DaoException;
-import com.epam.esm.database.H2DatabaseConfig;
+import com.epam.esm.config.H2DatabaseConfig;
 import com.epam.esm.entity.GiftCertificate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

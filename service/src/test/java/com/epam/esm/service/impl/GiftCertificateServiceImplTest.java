@@ -7,7 +7,7 @@ import com.epam.esm.dao.exception.DaoException;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ServiceException;
-import com.epam.esm.validator.CustomValidator;
+import com.epam.esm.validator.GiftCertificateValidator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -35,7 +35,7 @@ class GiftCertificateServiceImplTest {
     private GiftCertificateTagDao giftCertificateTagDao;
 
     @Mock
-    private CustomValidator validator;
+    private GiftCertificateValidator validator;
 
     @InjectMocks
     private GiftCertificateServiceImpl giftCertificateService;
