@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
          id="WebApp_ID" version="3.1">
 
-<display-name>GiftCertificateDemo</display-name>
+<!--<display-name>GiftCertificateDemo</display-name>
 
 <absolute-ordering/>
 
@@ -24,6 +24,10 @@
 <servlet-mapping>
   <servlet-name>dispatcher</servlet-name>
   <url-pattern>/app/*</url-pattern>
-</servlet-mapping>
+</servlet-mapping>-->
 
+    <error-page>
+        <error-code>400</error-code>
+        <location>/error/404_error.jsp</location>
+    </error-page>
 </web-app>

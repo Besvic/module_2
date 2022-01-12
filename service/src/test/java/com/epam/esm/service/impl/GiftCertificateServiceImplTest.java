@@ -99,9 +99,9 @@ class GiftCertificateServiceImplTest {
         when(tagDao.create(new Tag(1, "name"))).thenReturn(1L);
         when(giftCertificateTagDao.addTagToCertificate(1L, Collections.singletonList(1L)))
                 .thenReturn(new int[] {1});
-        boolean actual = giftCertificateService.create(certificate);
+        long actual = giftCertificateService.create(certificate);
 
-        assertTrue(actual);
+        assertEquals(1L, actual);
     }
 
     @Test

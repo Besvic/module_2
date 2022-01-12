@@ -173,8 +173,8 @@ public class GiftCertificateController {
     public ResponseEntity<Object> createGiftCertificate(@Valid @RequestBody GiftCertificate giftCertificate)
             throws ControllerException {
         try {
-            return giftCertificateService.create(giftCertificate) ? ResponseEntity.status(HttpStatus.OK).build()
-                    : ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+            long certificateId = giftCertificateService.create(giftCertificate);
+            return  ResponseEntity.status(HttpStatus.CREATED).body(certificateId);
         } catch (ServiceException e) {
             throw new ControllerException(e);
         }

@@ -140,7 +140,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
 
     @Override
     @Transactional
-    public boolean create(GiftCertificate giftCertificate) throws ServiceException {
+    public long create(GiftCertificate giftCertificate) throws ServiceException {
         long certificateId;
         try {
             certificateId = giftCertificateDao.create(giftCertificate);
@@ -169,7 +169,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
         } catch (DaoException e) {
             throw new ServiceException(e);
         }
-        return true;
+        return certificateId;
     }
 
     @Transactional
