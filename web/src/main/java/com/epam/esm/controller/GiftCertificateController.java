@@ -163,6 +163,16 @@ public class GiftCertificateController {
     }
 
     /**
+     * error method for incorrect url
+     *
+     * @return the response entity
+     */
+    @GetMapping(value = "/error", consumes = MediaType.ALL_VALUE)
+    public ResponseEntity<String> error() {
+        return new ResponseEntity<>(getMessageForLocale("incorrect.url"), HttpStatus.BAD_REQUEST);
+    }
+
+    /**
      * Create gift certificate response entity.
      *
      * @param giftCertificate the gift certificate

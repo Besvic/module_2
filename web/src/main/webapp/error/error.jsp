@@ -11,6 +11,8 @@
     <title>error</title>
 </head>
 <body>
-garbage in url
+<%
+response.sendRedirect("http://localhost:8080/app/certificate/error");
+%>
 </body>
 </html>
