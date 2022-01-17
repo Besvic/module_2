@@ -28,8 +28,8 @@ class TagServiceImplTest {
     @Test
     void create() throws ServiceException, DaoException {
         when(tagDao.create(new Tag())).thenReturn(1L);
-        boolean actual = tagService.create(new Tag());
-        assertTrue(actual);
+        long actual = tagService.create(new Tag());
+        assertEquals(1L, actual);
     }
 
     @Test

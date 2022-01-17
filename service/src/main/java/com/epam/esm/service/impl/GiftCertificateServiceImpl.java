@@ -174,7 +174,8 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
 
     @Transactional
     @Override
-    public boolean updateById(GiftCertificate current) throws ServiceException {
+    public Optional<GiftCertificate> updateById(GiftCertificate current) throws ServiceException {
+        Optional<GiftCertificate> updateCertificate;
         try {
             if ((current.getName() != null) && !current.getName().isEmpty()) {
                 giftCertificateDao.updateNameById(current.getName(), current.getId());
@@ -188,10 +189,11 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
             if (current.getPrice() > 0) {
                 giftCertificateDao.updatePriceById(current.getPrice(), current.getId());
             }
+            updateCertificate = giftCertificateDao.findById(current.getId());
         } catch (DaoException e) {
             throw new ServiceException(e);
         }
-        return true;
+        return updateCertificate;
     }
 
     @Override

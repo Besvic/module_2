@@ -54,16 +54,17 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public boolean create(Tag tag) throws ServiceException {
+    public long create(Tag tag) throws ServiceException {
         try {
-            if (tagDao.create(tag) == 0){
+            long tagId = tagDao.create(tag);
+            if ( tagId == 0){
                 log.warn(getMessageForLocale("tag.not.create"));
                 throw new ServiceException(getMessageForLocale("tag.not.create"));
             }
+            return tagId;
         } catch (DaoException e) {
             throw new ServiceException(e);
         }
-        return true;
     }
 
     @Override

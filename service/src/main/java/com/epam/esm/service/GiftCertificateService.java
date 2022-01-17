@@ -81,7 +81,7 @@ public interface GiftCertificateService {
      * @return the boolean
      * @throws ServiceException the service exception
      */
-    boolean updateById(GiftCertificate currentGiftCertificate) throws ServiceException;
+    Optional<GiftCertificate> updateById(GiftCertificate currentGiftCertificate) throws ServiceException;
 
     /**
      * Remove by id boolean.

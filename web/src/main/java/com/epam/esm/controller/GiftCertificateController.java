@@ -24,7 +24,7 @@ import static com.epam.esm.config.LocalizedMessage.getMessageForLocale;
  */
 @Validated
 @RestController
-@RequestMapping(value = "/certificate",
+@RequestMapping(value = "/certificates",
 produces = MediaType.APPLICATION_JSON_VALUE,
 consumes = MediaType.APPLICATION_JSON_VALUE)
 public class GiftCertificateController {
@@ -135,14 +135,14 @@ public class GiftCertificateController {
     /**
      * Find all sorted certificate by date response entity.
      *
-     * @param type the type
+     * @param orderBy the type
      * @return the response entity
      * @throws ServiceException the service exception
      */
-    @GetMapping("/sort/date/{type}")
-    public ResponseEntity<List<GiftCertificate>> findAllSortedCertificateByDate(@PathVariable("type") String type)
+    @GetMapping("/sort/date")
+    public ResponseEntity<List<GiftCertificate>> findAllSortedCertificateByDate(@RequestParam("order_by") String orderBy)
             throws ServiceException {
-       List<GiftCertificate> certificateList = giftCertificateService.findAllCertificateByDate(type);
+       List<GiftCertificate> certificateList = giftCertificateService.findAllCertificateByDate(orderBy);
         return certificateList.isEmpty() ? ResponseEntity.status(HttpStatus.NO_CONTENT).build() :
                 ResponseEntity.status(HttpStatus.OK).body(certificateList);
     }
@@ -150,14 +150,14 @@ public class GiftCertificateController {
     /**
      * Find all sorted certificate by name response entity.
      *
-     * @param type the type
+     * @param orderBy the type
      * @return the response entity
      * @throws ServiceException the service exception
      */
-    @GetMapping("/sort/name/{type}")
-    public ResponseEntity<List<GiftCertificate>> findAllSortedCertificateByName(@PathVariable("type") String type)
+    @GetMapping("/sort/name")
+    public ResponseEntity<List<GiftCertificate>> findAllSortedCertificateByName(@RequestParam("order_by") String orderBy)
             throws ServiceException {
-        List<GiftCertificate> certificateList = giftCertificateService.findAllCertificateByName(type);
+        List<GiftCertificate> certificateList = giftCertificateService.findAllCertificateByName(orderBy);
         return certificateList.isEmpty() ? ResponseEntity.status(HttpStatus.NO_CONTENT).build() :
                 ResponseEntity.status(HttpStatus.OK).body(certificateList);
     }
@@ -200,7 +200,7 @@ public class GiftCertificateController {
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<Object> removeById(@PathVariable("id") long id) throws ControllerException {
         try {
-            return giftCertificateService.removeById(id) ? ResponseEntity.status(HttpStatus.OK).build() :
+            return giftCertificateService.removeById(id) ? ResponseEntity.status(HttpStatus.OK).body(id) :
                     ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (ServiceException e) {
             throw new ControllerException(e);
@@ -216,12 +216,13 @@ public class GiftCertificateController {
      * @throws ControllerException the controller exception
      */
     @PatchMapping("/{id}")
-    public ResponseEntity<Object> updateBiId(@PathVariable("id") long id,
+    public ResponseEntity<GiftCertificate> updateBiId(@PathVariable("id") long id,
                                              @RequestBody @Valid GiftCertificate giftCertificate) throws ControllerException {
         giftCertificate.setId(id);
         try {
-            return giftCertificateService.updateById(giftCertificate) ? ResponseEntity.status(HttpStatus.OK).build() :
-            ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            Optional<GiftCertificate> updateGiftCertificate = giftCertificateService.updateById(giftCertificate);
+            return updateGiftCertificate.map(certificate -> ResponseEntity.status(HttpStatus.OK).body(certificate))
+                    .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
         } catch (ServiceException e) {
             throw new ControllerException(e);
         }

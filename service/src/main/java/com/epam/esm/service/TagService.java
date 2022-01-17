@@ -18,7 +18,7 @@ public interface TagService {
      * @return the boolean
      * @throws ServiceException the service exception
      */
-    boolean create(Tag tag) throws ServiceException;
+    long create(Tag tag) throws ServiceException;
 
     /**
      * Remove by id boolean.

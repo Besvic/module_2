@@ -117,8 +117,9 @@ class GiftCertificateServiceImplTest {
         when(giftCertificateDao.updateDescriptionById("description", 1L)).thenReturn(true);
         when(giftCertificateDao.updateDurationById(1, 1L)).thenReturn(true);
         when(giftCertificateDao.updatePriceById(1, 1L)).thenReturn(true);
-        boolean actual = giftCertificateService.updateById(certificate);
-        assertTrue(actual);
+        when(giftCertificateDao.findById(1L)).thenReturn(Optional.of(certificate));
+        Optional<GiftCertificate> actual = giftCertificateService.updateById(certificate);
+        assertEquals(certificate, actual.get());
     }
 
     @Test

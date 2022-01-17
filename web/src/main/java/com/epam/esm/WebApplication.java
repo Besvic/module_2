@@ -1,14 +1,12 @@
 package com.epam.esm;
 
-import com.epam.esm.config.DatabaseConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootApplication
-public class GiftCertificateDemo  {
+public class WebApplication {
     public static void main(String[] args) {
-        SpringApplication.run(GiftCertificateDemo.class, args);
+        SpringApplication.run(WebApplication.class, args);
     }
 
     /*@Bean

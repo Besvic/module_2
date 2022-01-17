@@ -16,7 +16,7 @@ import java.util.Optional;
  * The type Tag controller.
  */
 @RestController
-@RequestMapping(value = "/tag", consumes = MediaType.APPLICATION_JSON_VALUE,
+@RequestMapping(value = "/tags", consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE)
 public class TagController {
 
@@ -76,10 +76,9 @@ public class TagController {
      * @throws ControllerException the controller exception
      */
     @PostMapping()
-    public ResponseEntity.BodyBuilder create(@RequestBody Tag tag) throws ControllerException {
+    public ResponseEntity<Long> create(@RequestBody Tag tag) throws ControllerException {
         try {
-            return tagService.create(tag) ? ResponseEntity.status(HttpStatus.OK) :
-                    ResponseEntity.status(HttpStatus.NO_CONTENT);
+            return ResponseEntity.status(HttpStatus.CREATED).body(tagService.create(tag));
         } catch (ServiceException e) {
             throw new ControllerException(e);
         }
@@ -93,10 +92,9 @@ public class TagController {
      * @throws ControllerException the controller exception
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity.BodyBuilder remove(@PathVariable long id) throws ControllerException {
+    public ResponseEntity<Long> remove(@PathVariable long id) throws ControllerException {
         try {
-            return tagService.removeById(id) ? ResponseEntity.status(HttpStatus.OK) :
-                    ResponseEntity.status(HttpStatus.NO_CONTENT);
+            return tagService.removeById(id) ? ResponseEntity.status(HttpStatus.OK).body(id) : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (ServiceException e) {
             throw new ControllerException(e);
         }

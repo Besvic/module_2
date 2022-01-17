@@ -65,7 +65,8 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Override
     protected ResponseEntity<Object> handleMissingServletRequestParameter(MissingServletRequestParameterException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-        return super.handleMissingServletRequestParameter(ex, headers, status, request);
+        return ResponseEntity.badRequest().body(getMessageForLocale("incorrect.request.param"));
+        //return super.handleMissingServletRequestParameter(ex, headers, status, request);
     }
 
     @Override
