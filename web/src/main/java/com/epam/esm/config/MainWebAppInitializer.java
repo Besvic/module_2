@@ -1,3 +1,4 @@
+/*
 package com.epam.esm.config;
 
 import org.springframework.web.WebApplicationInitializer;
@@ -10,9 +11,11 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
 
+*/
 /**
  * MainWebAppInitializer need for register dispatch servlet and his configuration.
- */
+ *//*
+
 public class MainWebAppInitializer implements WebApplicationInitializer {
     @Override
     public void onStartup(final ServletContext sc) throws ServletException {
@@ -34,3 +37,4 @@ public class MainWebAppInitializer implements WebApplicationInitializer {
         appServlet.addMapping("/app/*");
     }
 }
+*/
