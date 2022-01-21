@@ -72,7 +72,7 @@ public interface GiftCertificateService {
      * @return the boolean
      * @throws ServiceException the service exception
      */
-    long create(GiftCertificate giftCertificate) throws ServiceException;
+    GiftCertificate create(GiftCertificate giftCertificate) throws ServiceException;
 
     /**
      * Update by id boolean.

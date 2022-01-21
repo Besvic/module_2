@@ -34,14 +34,10 @@ import java.util.stream.Collectors;
 import static com.epam.esm.config.LocalizedMessage.getMessageForLocale;
 
 /**
- * The type Default advice.
+ * The type Custom exception handler.
  */
 @RestControllerAdvice
 public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
-
-    public CustomExceptionHandler() {
-        super();
-    }
 
     @Override
     protected ResponseEntity<Object> handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
@@ -110,7 +106,12 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
 
-
+    /**
+     * Handle not found exception response entity.
+     *
+     * @param e the e
+     * @return the response entity
+     */
     @ExceptionHandler(ServletException.class)
     public ResponseEntity<CustomResponse> handleNotFoundException(Exception e) {
         CustomResponse response = new CustomResponse(HttpStatus.BAD_REQUEST.toString(), e.getMessage());
@@ -196,6 +197,4 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         CustomResponse response = new CustomResponse(HttpStatus.INTERNAL_SERVER_ERROR.toString(), ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
-
-    //@ExceptionHandler(BadTh)
 }

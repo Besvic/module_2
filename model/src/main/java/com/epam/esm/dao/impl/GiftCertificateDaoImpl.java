@@ -1,6 +1,7 @@
 package com.epam.esm.dao.impl;
 
 import com.epam.esm.dao.GiftCertificateDao;
+import com.epam.esm.dao.GiftCertificateResultSetExtractor;
 import com.epam.esm.dao.exception.DaoException;
 import com.epam.esm.entity.GiftCertificate;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,14 +12,11 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-import java.sql.PreparedStatement;
-import java.sql.Statement;
-import java.sql.Timestamp;
+import java.math.BigDecimal;
+import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import static com.epam.esm.config.LocalizedMessage.getMessageForLocale;
 
@@ -77,19 +75,22 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
     private String SQL_FIND_ALL_BY_NAME_OR_DESCRIPTION;
 
     private final JdbcTemplate jdbcTemplate;
+    private final GiftCertificateResultSetExtractor giftCertificateResultSetExtractor;
 
     /**
      * Instantiates a new Gift certificate dao.
      *
      * @param jdbcTemplate the jdbc template
+     * @param giftCertificateResultSetExtractor
      */
-    public GiftCertificateDaoImpl(JdbcTemplate jdbcTemplate) {
+    public GiftCertificateDaoImpl(JdbcTemplate jdbcTemplate, GiftCertificateResultSetExtractor giftCertificateResultSetExtractor) {
         this.jdbcTemplate = jdbcTemplate;
+        this.giftCertificateResultSetExtractor = giftCertificateResultSetExtractor;
     }
 
     @Override
     public List<GiftCertificate> findAll() {
-        return jdbcTemplate.query(SQL_FIND_ALL, new BeanPropertyRowMapper<>(GiftCertificate.class));
+        return jdbcTemplate.query(SQL_FIND_ALL, giftCertificateResultSetExtractor);
     }
 
     @Override
@@ -118,7 +119,7 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
     @Override
     public Optional<GiftCertificate> findById(long id) throws DaoException {
         Optional<GiftCertificate> giftCertificate = jdbcTemplate.query(SQL_FIND_BY_ID,
-                new BeanPropertyRowMapper<>(GiftCertificate.class), id).stream().findAny();
+                giftCertificateResultSetExtractor, id).stream().findAny();
         if (giftCertificate.isPresent()){
             return giftCertificate;
         }
@@ -136,7 +137,7 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
             preparedStatement.setInt(3, giftCertificate.getDuration());
             preparedStatement.setTimestamp(4, currentTime);
             preparedStatement.setString(5, giftCertificate.getName());
-            preparedStatement.setDouble(6, giftCertificate.getPrice());
+            preparedStatement.setBigDecimal(6, giftCertificate.getPrice());
             return preparedStatement;
         }, keyHolder);
         return Objects.requireNonNull(keyHolder.getKey()).longValue();
@@ -158,7 +159,7 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
     }
 
     @Override
-    public boolean updatePriceById(double price, long id) {
+    public boolean updatePriceById(BigDecimal price, long id) {
         return jdbcTemplate.update(SQL_UPDATE_PRICE, price, id) != 0;
     }
 

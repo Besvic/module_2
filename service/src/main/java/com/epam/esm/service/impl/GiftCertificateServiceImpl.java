@@ -14,7 +14,9 @@ import lombok.var;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -140,7 +142,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
 
     @Override
     @Transactional
-    public long create(GiftCertificate giftCertificate) throws ServiceException {
+    public GiftCertificate create(GiftCertificate giftCertificate) throws ServiceException {
         long certificateId;
         try {
             certificateId = giftCertificateDao.create(giftCertificate);
@@ -153,6 +155,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
         }
         List<Long> tagIdList = new ArrayList<>();
         Optional<Tag> tagOptional;
+        Optional<GiftCertificate> giftCertificateOptional;
         try {
             if (giftCertificate.getTagList() == null){
                 log.warn(getMessageForLocale("certificate.not.create"));
@@ -166,10 +169,11 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
                 log.warn(getMessageForLocale("tag.not.create"));
                 throw new ServiceException(getMessageForLocale("tag.not.create"));
             }
+            giftCertificateOptional = giftCertificateDao.findById(certificateId);
         } catch (DaoException e) {
             throw new ServiceException(e);
         }
-        return certificateId;
+        return giftCertificateOptional.orElse(new GiftCertificate());
     }
 
     @Transactional
@@ -177,7 +181,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     public Optional<GiftCertificate> updateById(GiftCertificate current) throws ServiceException {
         Optional<GiftCertificate> updateCertificate;
         try {
-            if ((current.getName() != null) && !current.getName().isEmpty()) {
+            if ((current.getName() != null) && !current.getName().isEmpty() ) {
                 giftCertificateDao.updateNameById(current.getName(), current.getId());
             }
             if ((current.getDescription() != null) && !current.getDescription().isEmpty()) {
@@ -186,8 +190,13 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
             if (current.getDuration() > 0) {
                 giftCertificateDao.updateDurationById(current.getDuration(), current.getId());
             }
-            if (current.getPrice() > 0) {
+            if (current.getPrice().compareTo(BigDecimal.ZERO) > 0) {
                 giftCertificateDao.updatePriceById(current.getPrice(), current.getId());
+            }
+            if ((current.getTagList() != null) && !(current.getTagList().isEmpty()) ){
+                for (var i : current.getTagList()) {
+                    giftCertificateTagDao.addTagToCertificate(current.getId(), Collections.singletonList(tagDao.create(i)));
+                }
             }
             updateCertificate = giftCertificateDao.findById(current.getId());
         } catch (DaoException e) {

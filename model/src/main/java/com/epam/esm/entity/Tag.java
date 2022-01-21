@@ -16,6 +16,11 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class Tag implements Serializable {
 
+    public Tag(@NotBlank(message = "Name can not be empty")
+               @Pattern(regexp = "[a-zA-zа-яА-Я\\s]+", message = "Name may contain only letters. You input: ${validatedValue}")
+                       String name) {
+        this.name = name;
+    }
 
     private long id;
     @NotBlank(message = "Name can not be empty")

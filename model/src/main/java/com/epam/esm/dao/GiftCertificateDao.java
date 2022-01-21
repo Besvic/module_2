@@ -3,6 +3,7 @@ package com.epam.esm.dao;
 import com.epam.esm.dao.exception.DaoException;
 import com.epam.esm.entity.GiftCertificate;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -112,7 +113,7 @@ public interface GiftCertificateDao {
      * @return the boolean
      * @throws DaoException the dao exception
      */
-    boolean updatePriceById(double price, long id) throws DaoException;
+    boolean updatePriceById(BigDecimal price, long id) throws DaoException;
 
     /**
      * Update last update date by id boolean.

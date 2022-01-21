@@ -13,6 +13,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.math.BigDecimal;
 import java.sql.SQLException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -68,7 +69,7 @@ public class GiftCertificateDaoImplTest {
                 .name("name")
                 .description("description")
                 .duration(1)
-                .price(1.1)
+                .price(BigDecimal.valueOf(1.1))
                 .build();
         long id = giftCertificateDao.create(certificate);
         giftCertificate = giftCertificateDao.findById(id).get();
@@ -137,7 +138,7 @@ public class GiftCertificateDaoImplTest {
 
     @Test
     void updatePriceById() throws DaoException {
-        double price = 111.11;
+        BigDecimal price = BigDecimal.valueOf(111.11);
         if (giftCertificateDao.updatePriceById(price, 1)){
             GiftCertificate actual = giftCertificateDao.findById(1).get();
             giftCertificate.setPrice(price);

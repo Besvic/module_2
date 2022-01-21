@@ -9,9 +9,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -25,15 +25,13 @@ import java.util.List;
 public class GiftCertificate implements Serializable {
 
     private long id;
-    @NotBlank(message = "Name can not be empty")
     @Pattern(regexp = "[a-zA-zа-яА-Я\\s]+", message = "Name may contain only letters. You input: ${validatedValue}")
     private String name;
-    @NotBlank(message = "Description can not be empty")
     @Pattern(regexp = "[a-zA-zа-яА-Я\\s]+", message = "Description may contain only letters. You input: ${validatedValue}")
     private String description;
     @Min(value = 0, message = "Price can not be less then 0. You input: ${validatedValue}")
-    private double price;
-    @Min(value = 1, message = "Duration can not be less then 1. You input: ${validatedValue}")
+    private BigDecimal price;
+    @Min(value = 0, message = "Duration can not be less then 0. You input: ${validatedValue}")
     private int duration;
     @JsonFormat
             (shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")

@@ -14,12 +14,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -99,9 +103,10 @@ class GiftCertificateServiceImplTest {
         when(tagDao.create(new Tag(1, "name"))).thenReturn(1L);
         when(giftCertificateTagDao.addTagToCertificate(1L, Collections.singletonList(1L)))
                 .thenReturn(new int[] {1});
-        long actual = giftCertificateService.create(certificate);
+        GiftCertificate actual = giftCertificateService.create(certificate);
+        certificate.setId(1L);
 
-        assertEquals(1L, actual);
+        assertEquals(certificate, actual);
     }
 
     @Test
@@ -111,12 +116,12 @@ class GiftCertificateServiceImplTest {
                 .name("name")
                 .description("description")
                 .duration(1)
-                .price(1)
+                .price(BigDecimal.valueOf(1))
                 .build();
         when(giftCertificateDao.updateNameById("name", 1L)).thenReturn(true);
         when(giftCertificateDao.updateDescriptionById("description", 1L)).thenReturn(true);
         when(giftCertificateDao.updateDurationById(1, 1L)).thenReturn(true);
-        when(giftCertificateDao.updatePriceById(1, 1L)).thenReturn(true);
+        when(giftCertificateDao.updatePriceById(BigDecimal.valueOf(1), 1L)).thenReturn(true);
         when(giftCertificateDao.findById(1L)).thenReturn(Optional.of(certificate));
         Optional<GiftCertificate> actual = giftCertificateService.updateById(certificate);
         assertEquals(certificate, actual.get());
@@ -207,7 +212,7 @@ class GiftCertificateServiceImplTest {
                 .name("name")
                 .description("description")
                 .duration(1)
-                .price(1)
+                .price(BigDecimal.valueOf(1))
                 .build();
         when(giftCertificateDao.updateNameById("name", 1L)).thenThrow(DaoException.class);
         assertThrows(ServiceException.class, () -> giftCertificateService.updateById(certificate));
@@ -220,7 +225,7 @@ class GiftCertificateServiceImplTest {
                 .name("name")
                 .description("description")
                 .duration(1)
-                .price(1)
+                .price(BigDecimal.valueOf(1))
                 .build();
         when(giftCertificateDao.updateNameById("name", 1L)).thenReturn(true);
         when(giftCertificateDao.updateDescriptionById("description", 1L)).thenThrow(DaoException.class);
@@ -234,7 +239,7 @@ class GiftCertificateServiceImplTest {
                 .name("name")
                 .description("description")
                 .duration(1)
-                .price(1)
+                .price(BigDecimal.valueOf(1))
                 .build();
         when(giftCertificateDao.updateNameById("name", 1L)).thenReturn(true);
         when(giftCertificateDao.updateDescriptionById("description", 1L)).thenReturn(true);
@@ -249,12 +254,12 @@ class GiftCertificateServiceImplTest {
                 .name("name")
                 .description("description")
                 .duration(1)
-                .price(1)
+                .price(BigDecimal.valueOf(1))
                 .build();
         when(giftCertificateDao.updateNameById("name", 1L)).thenReturn(true);
         when(giftCertificateDao.updateDescriptionById("description", 1L)).thenReturn(true);
         when(giftCertificateDao.updateDurationById(1, 1L)).thenReturn(true);
-        when(giftCertificateDao.updatePriceById(1, 1L)).thenThrow(DaoException.class);
+        when(giftCertificateDao.updatePriceById(BigDecimal.valueOf(1), 1L)).thenThrow(DaoException.class);
         assertThrows(ServiceException.class, () -> giftCertificateService.updateById(certificate));
     }
 
