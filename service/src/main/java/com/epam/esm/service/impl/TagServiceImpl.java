@@ -2,26 +2,31 @@ package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.TagDao;
 import com.epam.esm.dao.exception.DaoException;
-import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ServiceException;
 import com.epam.esm.service.TagService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
-import static com.epam.esm.config.Messages.getMessageForLocale;
+import static com.epam.esm.config.LocalizedMessage.getMessageForLocale;
 
+/**
+ * The type Tag service.
+ */
 @Slf4j
 @Service
 public class TagServiceImpl implements TagService {
 
     private final TagDao tagDao;
 
-    @Autowired
+    /**
+     * Instantiates a new Tag service.
+     *
+     * @param tagDao the tag dao
+     */
     public TagServiceImpl(TagDao tagDao) {
         this.tagDao = tagDao;
     }
@@ -49,16 +54,17 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public boolean create(Tag tag) throws ServiceException {
+    public long create(Tag tag) throws ServiceException {
         try {
-            if (tagDao.create(tag) == 0){
+            long tagId = tagDao.create(tag);
+            if ( tagId == 0){
                 log.warn(getMessageForLocale("tag.not.create"));
                 throw new ServiceException(getMessageForLocale("tag.not.create"));
             }
+            return tagId;
         } catch (DaoException e) {
             throw new ServiceException(e);
         }
-        return true;
     }
 
     @Override

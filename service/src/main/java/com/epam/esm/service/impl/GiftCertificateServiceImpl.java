@@ -8,19 +8,23 @@ import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ServiceException;
 import com.epam.esm.service.GiftCertificateService;
-import com.epam.esm.validator.CustomValidator;
+import com.epam.esm.validator.GiftCertificateValidator;
 import lombok.extern.slf4j.Slf4j;
 import lombok.var;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static com.epam.esm.config.Messages.getMessageForLocale;
+import static com.epam.esm.config.LocalizedMessage.getMessageForLocale;
 
+/**
+ * The type Gift certificate service.
+ */
 @Slf4j
 @Service
 public class GiftCertificateServiceImpl implements GiftCertificateService {
@@ -28,17 +32,23 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     private final GiftCertificateDao giftCertificateDao;
     private final TagDao tagDao;
     private final GiftCertificateTagDao giftCertificateTagDao;
-    private final CustomValidator customValidator;
+    private final GiftCertificateValidator giftCertificateValidator;
 
-    @Autowired
+    /**
+     * Instantiates a new Gift certificate service.
+     *
+     * @param giftCertificateDao    the gift certificate dao
+     * @param tagDao                the tag dao
+     * @param giftCertificateTagDao the gift certificate tag dao
+     * @param giftCertificateValidator       the custom validator
+     */
     public GiftCertificateServiceImpl(GiftCertificateDao giftCertificateDao, TagDao tagDao,
-                                      GiftCertificateTagDao giftCertificateTagDao, CustomValidator customValidator) {
+                                      GiftCertificateTagDao giftCertificateTagDao, GiftCertificateValidator giftCertificateValidator) {
         this.giftCertificateDao = giftCertificateDao;
         this.tagDao = tagDao;
         this.giftCertificateTagDao = giftCertificateTagDao;
-        this.customValidator = customValidator;
+        this.giftCertificateValidator = giftCertificateValidator;
     }
-
 
     private List<GiftCertificate> checkValueListGiftCertificate(List<GiftCertificate> certificateList)
             throws ServiceException {
@@ -62,7 +72,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     }
 
     private void checkType(String type) throws ServiceException {
-        if (!customValidator.isSortedType(type)) {
+        if (!giftCertificateValidator.isSortedType(type)) {
             log.warn(getMessageForLocale("certificate.incorrect.type.sort"));
             throw new ServiceException(getMessageForLocale("certificate.incorrect.type.sort"));
         }
@@ -132,8 +142,8 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
 
     @Override
     @Transactional
-    public boolean create(GiftCertificate giftCertificate) throws ServiceException {
-        long certificateId = 0;
+    public GiftCertificate create(GiftCertificate giftCertificate) throws ServiceException {
+        long certificateId;
         try {
             certificateId = giftCertificateDao.create(giftCertificate);
         } catch (DaoException e) {
@@ -145,43 +155,54 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
         }
         List<Long> tagIdList = new ArrayList<>();
         Optional<Tag> tagOptional;
+        Optional<GiftCertificate> giftCertificateOptional;
         try {
+            if (giftCertificate.getTagList() == null){
+                log.warn(getMessageForLocale("certificate.not.create"));
+                throw new ServiceException(getMessageForLocale("certificate.not.create"));
+            }
             for (var i: giftCertificate.getTagList()) {
                     tagOptional = tagDao.findByName(i.getName());
                     tagIdList.add(tagOptional.isPresent() ? tagOptional.get().getId() : tagDao.create(i));
             }
+            if (giftCertificateTagDao.addTagToCertificate(certificateId, tagIdList) == null){
+                log.warn(getMessageForLocale("tag.not.create"));
+                throw new ServiceException(getMessageForLocale("tag.not.create"));
+            }
+            giftCertificateOptional = giftCertificateDao.findById(certificateId);
         } catch (DaoException e) {
             throw new ServiceException(e);
         }
-
-        // TODO: 10.12.2021 may be change
-        if (giftCertificateTagDao.addTagToCertificate(certificateId, tagIdList) == null){
-            log.warn(getMessageForLocale("tag.not.create"));
-            throw new ServiceException(getMessageForLocale("tag.not.create"));
-        }
-        return true;
+        return giftCertificateOptional.orElse(new GiftCertificate());
     }
 
     @Transactional
     @Override
-    public boolean updateById(GiftCertificate current) throws ServiceException {
+    public Optional<GiftCertificate> updateById(GiftCertificate current) throws ServiceException {
+        Optional<GiftCertificate> updateCertificate;
         try {
-            if (!current.getName().isEmpty()) {
+            if ((current.getName() != null) && !current.getName().isEmpty() ) {
                 giftCertificateDao.updateNameById(current.getName(), current.getId());
             }
-            if (!current.getDescription().isEmpty()) {
+            if ((current.getDescription() != null) && !current.getDescription().isEmpty()) {
                 giftCertificateDao.updateDescriptionById(current.getDescription(), current.getId());
             }
-            if (current.getDuration() != 0) {
+            if (current.getDuration() > 0) {
                 giftCertificateDao.updateDurationById(current.getDuration(), current.getId());
             }
-            if (current.getPrice() != 0) {
+            if (current.getPrice().compareTo(BigDecimal.ZERO) > 0) {
                 giftCertificateDao.updatePriceById(current.getPrice(), current.getId());
             }
+            if ((current.getTagList() != null) && !(current.getTagList().isEmpty()) ){
+                for (var i : current.getTagList()) {
+                    giftCertificateTagDao.addTagToCertificate(current.getId(), Collections.singletonList(tagDao.create(i)));
+                }
+            }
+            updateCertificate = giftCertificateDao.findById(current.getId());
         } catch (DaoException e) {
             throw new ServiceException(e);
         }
-        return true;
+        return updateCertificate;
     }
 
     @Override

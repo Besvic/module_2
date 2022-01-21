@@ -2,7 +2,8 @@ package com.epam.esm.dao.impl;
 
 import com.epam.esm.dao.TagDao;
 import com.epam.esm.entity.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -13,32 +14,35 @@ import java.sql.PreparedStatement;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type Tag dao.
+ */
+@PropertySource("classpath:sql_tag.properties")
 @Repository
 public class TagDaoImpl implements TagDao {
 
-    private static final String SQL_INSERT = "insert into tag (name)\n" +
-            "values (?);";
+    @Value("${insert}")
+    private String SQL_INSERT;
 
-    private static final String SQL_REMOVE_BY_ID = "update tag\n" +
-            "set status = 'delete'\n" +
-            "where id = ?;";
+    @Value("${remove.id}")
+    private String SQL_REMOVE_BY_ID;
 
-    private static final String SQL_FIND_BY_ID = "select tag.id, tag.name\n" +
-            "from tag\n" +
-            "where id = ? and status = 'active';";
+    @Value("${find.id}")
+    private String SQL_FIND_BY_ID;
 
-    private static final String SQL_FIND_BY_NAME = "select tag.id, tag.name\n" +
-            "from tag\n" +
-            "where name = ? and status = 'active';";
+    @Value("${find.name}")
+    private String SQL_FIND_BY_NAME;
 
-    private static final String SQL_FIND_ALL = "select tag.id, tag.name\n" +
-            "from tag\n" +
-            "where status = 'active'\n" +
-            "order by name;";
+    @Value("${find.all}")
+    private String SQL_FIND_ALL;
 
     private final JdbcTemplate jdbcTemplate;
 
-    @Autowired
+    /**
+     * Instantiates a new Tag dao.
+     *
+     * @param jdbcTemplate the jdbc template
+     */
     public TagDaoImpl(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
