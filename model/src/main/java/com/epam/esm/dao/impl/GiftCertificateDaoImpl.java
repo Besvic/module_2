@@ -2,7 +2,7 @@ package com.epam.esm.dao.impl;
 
 import com.epam.esm.dao.GiftCertificateDao;
 import com.epam.esm.dao.GiftCertificateResultSetExtractor;
-import com.epam.esm.dao.exception.DaoException;
+import com.epam.esm.exception.DaoException;
 import com.epam.esm.entity.GiftCertificate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
@@ -24,7 +24,7 @@ import static com.epam.esm.config.LocalizedMessage.getMessageForLocale;
  * The type Gift certificate dao.
  */
 @Repository
-@PropertySource("classpath:sql_gift_certificate.properties")
+@PropertySource("classpath:sql_query/sql_gift_certificate.properties")
 public class GiftCertificateDaoImpl implements GiftCertificateDao {
 
     private static final String ASC = "asc";

@@ -1,6 +1,4 @@
-package com.epam.esm.dao.exception;
-
-import java.security.PrivilegedActionException;
+package com.epam.esm.exception;
 
 /**
  * The type Dao exception.

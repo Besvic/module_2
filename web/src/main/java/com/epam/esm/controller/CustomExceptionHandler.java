@@ -41,7 +41,8 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Override
     protected ResponseEntity<Object> handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-        return super.handleHttpRequestMethodNotSupported(ex, headers, status, request);
+        return new ResponseEntity<>(new CustomResponse("40402", getMessageForLocale("incorrect.url")), HttpStatus.NOT_FOUND);
+       // return super.handleHttpRequestMethodNotSupported(ex, headers, status, request);
     }
 
     @Override
@@ -163,7 +164,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
                                                                   HttpHeaders headers, HttpStatus status, WebRequest request) {
-        CustomResponse response = new CustomResponse(getMessageForLocale("incorrect.json"), ex.getMessage());
+        CustomResponse response = new CustomResponse("40002", getMessageForLocale("incorrect.json") + ex.getMessage());
         return new ResponseEntity(response, status);
     }
 

@@ -1,6 +1,6 @@
 package com.epam.esm.dao;
 
-import com.epam.esm.dao.exception.DaoException;
+import com.epam.esm.exception.DaoException;
 import com.epam.esm.entity.GiftCertificate;
 
 import java.math.BigDecimal;

@@ -15,7 +15,7 @@ import java.util.List;
  * The type Gift certificate tag dao.
  */
 @Repository
-@PropertySource("classpath:sql_gift_certificate_tag.properties")
+@PropertySource("classpath:sql_query/sql_gift_certificate_tag.properties")
 public class GiftCertificateTagDaoImpl implements GiftCertificateTagDao {
 
     @Value("${create}")

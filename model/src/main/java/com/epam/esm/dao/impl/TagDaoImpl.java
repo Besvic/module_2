@@ -12,12 +12,13 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
  * The type Tag dao.
  */
-@PropertySource("classpath:sql_tag.properties")
+@PropertySource("classpath:sql_query/sql_tag.properties")
 @Repository
 public class TagDaoImpl implements TagDao {
 
@@ -27,13 +28,13 @@ public class TagDaoImpl implements TagDao {
     @Value("${remove.id}")
     private String SQL_REMOVE_BY_ID;
 
-    @Value("${find.id}")
+    @Value("${user.find.id}")
     private String SQL_FIND_BY_ID;
 
     @Value("${find.name}")
     private String SQL_FIND_BY_NAME;
 
-    @Value("${find.all}")
+    @Value("${user.find.all}")
     private String SQL_FIND_ALL;
 
     private final JdbcTemplate jdbcTemplate;
@@ -55,7 +56,7 @@ public class TagDaoImpl implements TagDao {
             preparedStatement.setString(1, tag.getName());
             return preparedStatement;
         }, keyHolder);
-        return keyHolder.getKey().longValue();
+        return Objects.requireNonNull(keyHolder.getKey()).longValue();
     }
 
     @Override
