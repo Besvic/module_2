@@ -1,17 +1,12 @@
-/*
 package com.epam.esm.dao;
 
 import com.epam.esm.entity.Order;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface OrderDao {
+public interface OrderDao extends JpaRepository<Order, Long> {
 
-    long create(Order order);
-    Optional<Order> findById(long id);
-    List<Order> findAll();
-    boolean remove(long id);
-
+    List<Order> findAllByUser_Id(long userId);
 }
-*/

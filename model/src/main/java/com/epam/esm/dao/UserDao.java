@@ -1,13 +1,15 @@
 package com.epam.esm.dao;
 
 import com.epam.esm.entity.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
-import java.util.Optional;
 
-public interface UserDao {
+public interface UserDao extends JpaRepository<User, Long> {
 
-    long create(User user);
-    List<User> findAll();
-    Optional<User> findById(long id);
+    List<User> findAllByNameContaining(String name);
+
+
 }

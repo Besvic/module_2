@@ -10,9 +10,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 
-/**
- * The type H 2 database config.
- */
 @Configuration
 @EnableTransactionManagement
 @PropertySource("classpath:database.properties")
@@ -28,11 +25,6 @@ public class H2DatabaseConfig {
     @Value("${driverClassName}")
     private String DRIVER_CLASS_NAME;
 
-    /**
-     * Date source data source.
-     *
-     * @return the data source
-     */
     @Bean
     public DataSource dateSource(){
         BasicDataSource dataSource = new BasicDataSource();
@@ -43,22 +35,11 @@ public class H2DatabaseConfig {
         return dataSource;
     }
 
-    /**
-     * Jdbc template jdbc template.
-     *
-     * @return the jdbc template
-     */
     @Bean
     public JdbcTemplate jdbcTemplate(){
         return new JdbcTemplate(dateSource());
     }
 
-    /**
-     * Gets transaction manager.
-     *
-     * @param dataSource the data source
-     * @return the transaction manager
-     */
     @Bean("transactionManager")
     public PlatformTransactionManager getTransactionManager(DataSource dataSource) {
         DataSourceTransactionManager dataSourceTransactionManager = new DataSourceTransactionManager();

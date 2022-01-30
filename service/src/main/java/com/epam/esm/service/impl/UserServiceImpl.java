@@ -22,12 +22,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User create(User user) throws ServiceException {
-        long id = userDao.create(user);
-        if (id != 0){
-            user.setId(id);
-            return user;
-        }
-        throw new ServiceException(getMessageForLocale("user.not.create"));
+        return userDao.save(user);
     }
 
     @Override
@@ -47,4 +42,25 @@ public class UserServiceImpl implements UserService {
         }
         throw new ServiceException(getMessageForLocale("user.not.found"));
     }
+
+    @Override
+    public List<User> findAllByName(String name) throws ServiceException {
+        List<User> userList = userDao.findAllByNameContaining(name);
+        if (!userList.isEmpty()){
+            return userList;
+        }
+        throw new ServiceException(getMessageForLocale("user.not.found"));
+    }
+
+    @Override
+    public long deleteById(long userId) throws ServiceException {
+        try {
+            userDao.deleteById(userId);
+            return userId;
+        } catch (Exception e){
+            throw new ServiceException("impossible delete user " + e);
+        }
+    }
+
+
 }

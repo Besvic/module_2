@@ -55,6 +55,16 @@ public class TagController {
                 ResponseEntity.status(HttpStatus.OK).body(tagList);
     }
 
+    @GetMapping(value = "/search")
+    public ResponseEntity<Tag> findAllMostlyUsedTagByOrderPrice() throws ControllerException {
+        try {
+            Tag tag = tagService.findAllMostlyUsedTagByOrderPrice().get();
+            return new ResponseEntity<>(tag, HttpStatus.OK);
+        } catch (ServiceException e) {
+            throw new ControllerException(e);
+        }
+    }
+
     /**
      * Find by id response entity.
      *
@@ -82,7 +92,7 @@ public class TagController {
      * @throws ControllerException the controller exception
      */
     @PostMapping()
-    public ResponseEntity<Long> create(@RequestBody Tag tag) throws ControllerException {
+    public ResponseEntity<Tag> create(@RequestBody Tag tag) throws ControllerException {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(tagService.create(tag));
         } catch (ServiceException e) {
@@ -100,7 +110,8 @@ public class TagController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Long> remove(@PathVariable long id) throws ControllerException {
         try {
-            return tagService.removeById(id) ? ResponseEntity.status(HttpStatus.OK).body(id) : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            return tagService.removeById(id) ? ResponseEntity.status(HttpStatus.OK).body(id)
+                    : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (ServiceException e) {
             throw new ControllerException(e);
         }

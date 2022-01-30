@@ -15,12 +15,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-/**
- * The type Tag dao.
- */
 @PropertySource("classpath:sql_query/sql_tag.properties")
 @Repository
-public class TagDaoImpl implements TagDao {
+public class TagDaoImpl /*implements TagDao*/ {
 
     @Value("${insert}")
     private String SQL_INSERT;
@@ -39,20 +36,15 @@ public class TagDaoImpl implements TagDao {
 
     private final JdbcTemplate jdbcTemplate;
 
-    /**
-     * Instantiates a new Tag dao.
-     *
-     * @param jdbcTemplate the jdbc template
-     */
     public TagDaoImpl(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    @Override
+    /*@Override
     public long create(Tag tag) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(con -> {
-            PreparedStatement preparedStatement = con.prepareStatement(SQL_INSERT, new String[] {"id"});
+            PreparedStatement preparedStatement = con.prepareStatement(SQL_INSERT, new String[] {"tag_id"});
             preparedStatement.setString(1, tag.getName());
             return preparedStatement;
         }, keyHolder);
@@ -78,4 +70,5 @@ public class TagDaoImpl implements TagDao {
     public List<Tag> findAll() {
         return jdbcTemplate.query(SQL_FIND_ALL, new BeanPropertyRowMapper<>(Tag.class));
     }
+*/
 }

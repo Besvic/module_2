@@ -5,6 +5,9 @@ import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ControllerException;
 import com.epam.esm.exception.ServiceException;
 import com.epam.esm.service.GiftCertificateService;
+import lombok.var;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +23,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.security.cert.Certificate;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,13 +59,17 @@ public class GiftCertificateController {
      * @throws ControllerException the controller exception
      */
     @GetMapping()
-    public ResponseEntity<List<GiftCertificate>> findAll() throws ControllerException {
+    public ResponseEntity<List<GiftCertificate>> findAll(Pageable pageable) throws ControllerException {
         List<GiftCertificate> giftCertificateList;
         try {
-            giftCertificateList = giftCertificateService.findAll();
+            giftCertificateList = giftCertificateService.findAll(pageable);
         } catch (ServiceException e) {
             throw new ControllerException(e);
         }
+//        for (var i: giftCertificateList) {
+//            long id = i.getId();
+//            i.add(linkTo(methodOn(GiftCertificateController.class).findById(id)).withSelfRel());
+//        }
         return giftCertificateList.isEmpty() ? ResponseEntity.status(HttpStatus.NO_CONTENT).build() :
                 ResponseEntity.status(HttpStatus.OK).body(giftCertificateList);
     }
@@ -164,6 +174,16 @@ public class GiftCertificateController {
         return certificateList.isEmpty() ? ResponseEntity.status(HttpStatus.NO_CONTENT).build() :
                 ResponseEntity.status(HttpStatus.OK).body(certificateList);
     }
+    
+    @GetMapping("/search/by/tags")
+    public ResponseEntity<List<GiftCertificate>> findAllByTags(@RequestParam("tag_id") String strTagId) throws ControllerException {
+        try {
+            List<GiftCertificate> certificateList = giftCertificateService.findAllByTagIdList(strTagId);
+            return new ResponseEntity<>(certificateList, HttpStatus.OK);
+        } catch (ServiceException e) {
+            throw new ControllerException(e);
+        }
+    }
 
     /**
      * error method for incorrect url
@@ -223,9 +243,8 @@ public class GiftCertificateController {
                                              @RequestBody @Valid GiftCertificate giftCertificate) throws ControllerException {
         giftCertificate.setId(id);
         try {
-            Optional<GiftCertificate> updateGiftCertificate = giftCertificateService.updateById(giftCertificate);
-            return updateGiftCertificate.map(certificate -> ResponseEntity.status(HttpStatus.OK).body(certificate))
-                    .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+            GiftCertificate updateGiftCertificate = giftCertificateService.updateById(giftCertificate);
+            return new ResponseEntity<>(updateGiftCertificate, HttpStatus.OK);
         } catch (ServiceException e) {
             throw new ControllerException(e);
         }

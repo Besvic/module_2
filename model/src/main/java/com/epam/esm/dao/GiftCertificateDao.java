@@ -2,135 +2,53 @@ package com.epam.esm.dao;
 
 import com.epam.esm.exception.DaoException;
 import com.epam.esm.entity.GiftCertificate;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
+import javax.persistence.criteria.Predicate;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * The interface Gift certificate dao.
- */
-public interface GiftCertificateDao {
+@Repository
+public interface GiftCertificateDao extends JpaRepository<GiftCertificate, Long>, GiftCertificateRepositoryCustom {
 
-    /**
-     * Find all list.
-     *
-     * @return the list
-     * @throws DaoException the dao exception
-     */
-    List<GiftCertificate> findAll() throws DaoException;
+//    List<GiftCertificate> findAll();
 
-    /**
-     * Find all certificate by tag name list.
-     *
-     * @param tagName the tag name
-     * @return the list
-     * @throws DaoException the dao exception
-     */
-    List<GiftCertificate> findAllCertificateByTagName(String tagName) throws DaoException;
+    @Query("select t, gc from GiftCertificate gc inner join Tag t where t.name = 'qaz'")
+    List<GiftCertificate> findAllByTagListName(@Param("tagName") String tagName) throws DaoException;
 
-    /**
-     * Find all certificate by name or description list.
-     *
-     * @param name        the name
-     * @param description the description
-     * @return the list
-     * @throws DaoException the dao exception
-     */
-    List<GiftCertificate> findAllCertificateByNameOrDescription(String name, String description) throws DaoException;
+    List<GiftCertificate> findAllByNameContainingOrDescriptionContaining(String name, String description) throws DaoException;
 
-    /**
-     * Find all certificate by date list.
-     *
-     * @param type the type
-     * @return the list
-     * @throws DaoException the dao exception
-     */
-    List<GiftCertificate> findAllCertificateByDate(String type) throws DaoException;
 
-    /**
-     * Find all certificate by name list.
-     *
-     * @param type the type
-     * @return the list
-     * @throws DaoException the dao exception
-     */
-    List<GiftCertificate> findAllCertificateByName(String type) throws DaoException;
+    List<GiftCertificate> findAllByOrderByCreateDateAsc();
 
-    /**
-     * Find by id optional.
-     *
-     * @param id the id
-     * @return the optional
-     * @throws DaoException the dao exception
-     */
-    Optional<GiftCertificate> findById(long id) throws DaoException;
+    List<GiftCertificate> findAllByOrderByCreateDateDesc();
 
-    /**
-     * Create long.
-     *
-     * @param giftCertificate the gift certificate
-     * @return the long
-     * @throws DaoException the dao exception
-     */
-    long create(GiftCertificate giftCertificate) throws DaoException;
 
-    /**
-     * Update name by id boolean.
-     *
-     * @param name the name
-     * @param id   the id
-     * @return the boolean
-     * @throws DaoException the dao exception
-     */
-    boolean updateNameById(String name, long id) throws DaoException;
+    List<GiftCertificate> findAllByOrderByNameAsc();
+    List<GiftCertificate> findAllByOrderByNameDesc();
 
-    /**
-     * Update description by id boolean.
-     *
-     * @param description the description
-     * @param id          the id
-     * @return the boolean
-     * @throws DaoException the dao exception
-     */
-    boolean updateDescriptionById(String description, long id) throws DaoException;
+//    @Query("select gc from GiftCertificate gc join gc.tagList t where t.id = :predicate")
+//    List<GiftCertificate> foundByTagIdList(Predicate predicate);
 
-    /**
-     * Update duration by id boolean.
-     *
-     * @param duration the duration
-     * @param id       the id
-     * @return the boolean
-     * @throws DaoException the dao exception
-     */
-    boolean updateDurationById(int duration, long id) throws DaoException;
+    List<GiftCertificate> findAllByTagListId(List<Long> tagId);
 
-    /**
-     * Update price by id boolean.
-     *
-     * @param price the price
-     * @param id    the id
-     * @return the boolean
-     * @throws DaoException the dao exception
-     */
-    boolean updatePriceById(BigDecimal price, long id) throws DaoException;
+   // boolean updateNameById(String name, long id) throws DaoException;
 
-    /**
-     * Update last update date by id boolean.
-     *
-     * @param id the id
-     * @return the boolean
-     * @throws DaoException the dao exception
-     */
-    boolean updateLastUpdateDateById(long id) throws DaoException;
 
-    /**
-     * Remove by id boolean.
-     *
-     * @param id the id
-     * @return the boolean
-     * @throws DaoException the dao exception
-     */
+
+//    boolean updateDescriptionById(String description, long id) throws DaoException;
+//
+//    boolean updateDurationById(int duration, long id) throws DaoException;
+//
+//    boolean updatePriceById(BigDecimal price, long id) throws DaoException;
+//
+//    boolean updateLastUpdateDateById(long id) throws DaoException;
+
     boolean removeById(long id) throws DaoException;
 
 

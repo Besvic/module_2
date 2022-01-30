@@ -1,23 +1,13 @@
 package com.epam.esm.dao.impl;
 
-import com.epam.esm.dao.UserDao;
-import com.epam.esm.entity.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-
-import java.sql.PreparedStatement;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 @Repository
 @PropertySource("classpath:sql_query/sql_user.properties")
-public class UserDaoImpl implements UserDao {
+public class UserDaoImpl {
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -34,7 +24,8 @@ public class UserDaoImpl implements UserDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    @Override
+
+   /* @Override
     public long create(User user) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(con -> {
@@ -58,5 +49,7 @@ public class UserDaoImpl implements UserDao {
     @Override
     public Optional<User> findById(long id) {
         return jdbcTemplate.query(SQL_FIND_BY_ID, new BeanPropertyRowMapper<>(User.class), id).stream().findAny();
-    }
+    }*/
+
+
 }

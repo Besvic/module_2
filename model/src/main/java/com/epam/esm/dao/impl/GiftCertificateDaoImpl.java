@@ -1,3 +1,4 @@
+/*
 package com.epam.esm.dao.impl;
 
 import com.epam.esm.dao.GiftCertificateDao;
@@ -20,12 +21,11 @@ import java.util.*;
 
 import static com.epam.esm.config.LocalizedMessage.getMessageForLocale;
 
-/**
- * The type Gift certificate dao.
- */
 @Repository
 @PropertySource("classpath:sql_query/sql_gift_certificate.properties")
-public class GiftCertificateDaoImpl implements GiftCertificateDao {
+public class GiftCertificateDaoImpl */
+/*implements GiftCertificateDao*//*
+ {
 
     private static final String ASC = "asc";
 
@@ -77,12 +77,6 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
     private final JdbcTemplate jdbcTemplate;
     private final GiftCertificateResultSetExtractor giftCertificateResultSetExtractor;
 
-    /**
-     * Instantiates a new Gift certificate dao.
-     *
-     * @param jdbcTemplate the jdbc template
-     * @param giftCertificateResultSetExtractor
-     */
     public GiftCertificateDaoImpl(JdbcTemplate jdbcTemplate, GiftCertificateResultSetExtractor giftCertificateResultSetExtractor) {
         this.jdbcTemplate = jdbcTemplate;
         this.giftCertificateResultSetExtractor = giftCertificateResultSetExtractor;
@@ -173,3 +167,4 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
         return jdbcTemplate.update(SQL_REMOVE, id) != 0;
     }
 }
+*/
