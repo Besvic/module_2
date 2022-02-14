@@ -1,9 +1,19 @@
 package com.epam.esm.controller;
 
+import com.epam.esm.config.MapperUtil;
+import com.epam.esm.dto.converter.TagConverter;
+import com.epam.esm.dto.entity.TagDTO;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ControllerException;
 import com.epam.esm.exception.ServiceException;
 import com.epam.esm.service.TagService;
+import lombok.var;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,8 +25,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-import java.util.Optional;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 /**
  * The type Tag controller.
@@ -27,93 +37,124 @@ import java.util.Optional;
 public class TagController {
 
     private final TagService tagService;
+    private final TagConverter tagConverter;
 
     /**
      * Instantiates a new Tag controller.
      *
-     * @param tagService the tag service
+     * @param tagService   the tag service
+     * @param tagConverter the tag converter
      */
-    public TagController(TagService tagService) {
+    public TagController(TagService tagService, TagConverter tagConverter) {
         this.tagService = tagService;
+        this.tagConverter = tagConverter;
     }
 
     /**
      * Find all response entity.
      *
+     * @param pageable           the pageable
+     * @param resourcesAssembler the resources assembler
      * @return the response entity
      * @throws ControllerException the controller exception
      */
     @GetMapping()
-    public ResponseEntity<List<Tag>> findAll() throws ControllerException {
-        List<Tag> tagList;
+    public ResponseEntity<PagedModel<EntityModel<TagDTO>>> findAll(Pageable pageable, PagedResourcesAssembler<TagDTO> resourcesAssembler) throws ControllerException {
+        Page<TagDTO> tagDTOS;
+        PagedModel<EntityModel<TagDTO>> pagedModel;
         try {
-            tagList = tagService.findAll();
+            tagDTOS = MapperUtil.convertList(tagService.findAll(pageable), tagConverter::convertToTagDTO);
+            for (var i : tagDTOS) {
+               initializeTagDTOWithLink(i);
+            }
         } catch (ServiceException e) {
             throw new ControllerException(e);
         }
-        return tagList.isEmpty() ? ResponseEntity.notFound().build() :
-                ResponseEntity.status(HttpStatus.OK).body(tagList);
+        pagedModel = resourcesAssembler.toModel(tagDTOS);
+        pagedModel.add(linkTo(methodOn(TagController.class).searchMostlyUsedTagByOrderPrice()).withSelfRel().withType(HttpMethod.GET.name()))
+                .add(linkTo(methodOn(TagController.class).findAll(pageable, resourcesAssembler)).withSelfRel().withType(HttpMethod.GET.name()))
+                .add(linkTo(methodOn(TagController.class)).withSelfRel().withType(HttpMethod.POST.name()));
+        return tagDTOS.isEmpty() ? new ResponseEntity<>(HttpStatus.NO_CONTENT) :
+                new ResponseEntity<>(pagedModel, HttpStatus.OK);
     }
 
+    /**
+     * Search mostly used tag by order price response entity.
+     *
+     * @return the response entity
+     * @throws ControllerException the controller exception
+     */
     @GetMapping(value = "/search")
-    public ResponseEntity<Tag> findAllMostlyUsedTagByOrderPrice() throws ControllerException {
+    public ResponseEntity<TagDTO> searchMostlyUsedTagByOrderPrice()
+            throws ControllerException {
+        TagDTO tagDTO;
         try {
-            Tag tag = tagService.findAllMostlyUsedTagByOrderPrice().get();
-            return new ResponseEntity<>(tag, HttpStatus.OK);
+            tagDTO = tagConverter.convertToTagDTO(tagService.findAllMostlyUsedTagByOrderPrice());
+            initializeTagDTOWithLink(tagDTO);
         } catch (ServiceException e) {
             throw new ControllerException(e);
         }
+        return new ResponseEntity<>(tagDTO, HttpStatus.OK);
     }
+
 
     /**
      * Find by id response entity.
      *
-     * @param id the id
+     * @param tagId the tag id
      * @return the response entity
      * @throws ControllerException the controller exception
      */
-    @GetMapping("/{id}")
-    public ResponseEntity<Tag> findById(@PathVariable long id) throws ControllerException {
-        Optional<Tag> tag;
+    @GetMapping("/{tag_id}")
+    public ResponseEntity<TagDTO> findById(@PathVariable("tag_id") long tagId) throws ControllerException {
+        TagDTO tagDTO;
         try {
-            tag = tagService.findById(id);
+            tagDTO = tagConverter.convertToTagDTO(tagService.findById(tagId));
+            initializeTagDTOWithLink(tagDTO);
         } catch (ServiceException e) {
             throw new ControllerException(e);
         }
-        return tag.map(value -> ResponseEntity.status(HttpStatus.OK).body(value)).
-                orElseGet(() -> ResponseEntity.notFound().build());
+        return new ResponseEntity<>(tagDTO, HttpStatus.OK);
     }
 
     /**
-     * Create response entity . body builder.
+     * Create response entity.
      *
-     * @param tag the tag
-     * @return the response entity . body builder
+     * @param tagDTO the tag dto
+     * @return the response entity
      * @throws ControllerException the controller exception
      */
     @PostMapping()
-    public ResponseEntity<Tag> create(@RequestBody Tag tag) throws ControllerException {
+    public ResponseEntity<TagDTO> create(@RequestBody TagDTO tagDTO) throws ControllerException {
+        Tag tag = tagConverter.converterToTag(tagDTO);
         try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(tagService.create(tag));
+            tagDTO = tagConverter.convertToTagDTO(tagService.create(tag));
+            initializeTagDTOWithLink(tagDTO);
+        } catch (ServiceException e) {
+            throw new ControllerException(e);
+        }
+        return new ResponseEntity<>(tagDTO, HttpStatus.CREATED);
+    }
+
+    /**
+     * Remove response entity.
+     *
+     * @param tagId the tag id
+     * @return the response entity
+     * @throws ControllerException the controller exception
+     */
+    @DeleteMapping("/{tag_id}")
+    public ResponseEntity<Long> remove(@PathVariable("tag_id") long tagId) throws ControllerException {
+        try {
+            return tagService.removeById(tagId) ? new ResponseEntity<>(tagId, HttpStatus.OK)
+                    : new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (ServiceException e) {
             throw new ControllerException(e);
         }
     }
 
-    /**
-     * Remove response entity . body builder.
-     *
-     * @param id the id
-     * @return the response entity . body builder
-     * @throws ControllerException the controller exception
-     */
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Long> remove(@PathVariable long id) throws ControllerException {
-        try {
-            return tagService.removeById(id) ? ResponseEntity.status(HttpStatus.OK).body(id)
-                    : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        } catch (ServiceException e) {
-            throw new ControllerException(e);
-        }
+    private void initializeTagDTOWithLink(TagDTO tagDTO) throws ControllerException {
+        tagDTO.add(linkTo(methodOn(TagController.class).findById(tagDTO.getId())).withSelfRel().withType(HttpMethod.GET.name()))
+                .add(linkTo(methodOn(TagController.class).remove(tagDTO.getId())).withSelfRel().withType(HttpMethod.DELETE.name()));
     }
 }

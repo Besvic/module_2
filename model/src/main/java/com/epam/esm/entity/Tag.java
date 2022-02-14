@@ -1,34 +1,50 @@
 package com.epam.esm.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Pattern;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import javax.persistence.Table;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * The type Tag.
+ */
 @Data
-//@AllArgsConstructor
 @Entity
 @Table(name = "tag")
 public class Tag implements Serializable {
 
+    /**
+     * Instantiates a new Tag.
+     */
     public Tag() {
     }
 
-    public Tag(long id, @NotBlank(message = "Name can not be empty") @Pattern(regexp = "[a-zA-zа-яА-Я\\s]+", message = "Name may contain only letters. You input: ${validatedValue}") String name) {
+    /**
+     * Instantiates a new Tag.
+     *
+     * @param id   the id
+     * @param name the name
+     */
+    public Tag(long id, String name) {
         this.id = id;
         this.name = name;
     }
 
-    public Tag(@NotBlank(message = "Name can not be empty")
-               @Pattern(regexp = "[a-zA-zа-яА-Я\\s]+", message = "Name may contain only letters. You input: ${validatedValue}")
-                       String name) {
+    /**
+     * Instantiates a new Tag.
+     *
+     * @param name the name
+     */
+    public Tag(String name) {
         this.name = name;
     }
 
@@ -36,24 +52,7 @@ public class Tag implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "tag_id")
     private long id;
-    @NotBlank(message = "Name can not be empty")
-    @Pattern(regexp = "[a-zA-zа-яА-Я\\s]+", message = "Name may contain only letters. You input: ${validatedValue}")
     private String name;
-
-
-    @JsonIgnore
     @ManyToMany(mappedBy = "tagList", fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
-
-   /* @JoinTable( name = "gift_certification_tag",
-            joinColumns = @JoinColumn(name = "id_tag"),
-            inverseJoinColumns = @JoinColumn(name = "id_gift_certification"))*/
     private List<GiftCertificate> certificateList;
-
-    @Override
-    public String toString() {
-        return "Tag{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                '}';
-    }
 }

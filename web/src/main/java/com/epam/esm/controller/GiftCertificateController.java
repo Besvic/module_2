@@ -1,13 +1,21 @@
 package com.epam.esm.controller;
 
+import com.epam.esm.config.MapperUtil;
+import com.epam.esm.dto.converter.GiftCertificateConverter;
+import com.epam.esm.dto.entity.GiftCertificateDTO;
+import com.epam.esm.dto.entity.TagDTO;
 import com.epam.esm.entity.GiftCertificate;
-import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ControllerException;
 import com.epam.esm.exception.ServiceException;
 import com.epam.esm.service.GiftCertificateService;
 import lombok.var;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -23,13 +31,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-import java.security.cert.Certificate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
 
-import static com.epam.esm.config.LocalizedMessage.getMessageForLocale;
+import java.util.List;
+
+import static com.epam.esm.util.LocalizedMessage.getMessageForLocale;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 /**
  * The type Gift certificate controller.
@@ -42,97 +49,119 @@ consumes = MediaType.APPLICATION_JSON_VALUE)
 public class GiftCertificateController {
 
     private final GiftCertificateService giftCertificateService;
+    private final GiftCertificateConverter certificateConverter;
 
     /**
      * Instantiates a new Gift certificate controller.
      *
      * @param giftCertificateService the gift certificate service
+     * @param certificateConverter   the certificate converter
      */
-    public GiftCertificateController(GiftCertificateService giftCertificateService) {
+    public GiftCertificateController(GiftCertificateService giftCertificateService, GiftCertificateConverter certificateConverter) {
         this.giftCertificateService = giftCertificateService;
+        this.certificateConverter = certificateConverter;
     }
 
     /**
      * Find all response entity.
      *
+     * @param pageable           the pageable
+     * @param resourcesAssembler the resources assembler
      * @return the response entity
      * @throws ControllerException the controller exception
      */
     @GetMapping()
-    public ResponseEntity<List<GiftCertificate>> findAll(Pageable pageable) throws ControllerException {
-        List<GiftCertificate> giftCertificateList;
+    public ResponseEntity<PagedModel<EntityModel<GiftCertificateDTO>>> findAll(Pageable pageable, PagedResourcesAssembler<GiftCertificateDTO> resourcesAssembler)
+            throws ControllerException {
+        Page<GiftCertificateDTO> giftCertificateDTOS;
+        PagedModel<EntityModel<GiftCertificateDTO>> pagedModel;
         try {
-            giftCertificateList = giftCertificateService.findAll(pageable);
+            giftCertificateDTOS = MapperUtil.convertList(giftCertificateService.findAll(pageable), certificateConverter::convertToGiftCertificateDTO);
+            initializeGiftCertificateDTOListWithLinks(giftCertificateDTOS);
         } catch (ServiceException e) {
             throw new ControllerException(e);
         }
-//        for (var i: giftCertificateList) {
-//            long id = i.getId();
-//            i.add(linkTo(methodOn(GiftCertificateController.class).findById(id)).withSelfRel());
-//        }
-        return giftCertificateList.isEmpty() ? ResponseEntity.status(HttpStatus.NO_CONTENT).build() :
-                ResponseEntity.status(HttpStatus.OK).body(giftCertificateList);
+        pagedModel = resourcesAssembler.toModel(giftCertificateDTOS);
+        initializePageModel(pagedModel, pageable, resourcesAssembler);
+        return giftCertificateDTOS.isEmpty() ? new ResponseEntity<>(HttpStatus.NO_CONTENT) :
+                new ResponseEntity<>(pagedModel, HttpStatus.OK);
     }
 
 
     /**
      * Find by id response entity.
      *
-     * @param id the id
+     * @param certificateId the certificate id
      * @return the response entity
      * @throws ControllerException the controller exception
      */
-    @GetMapping(value = "/{id}")
-    public ResponseEntity<GiftCertificate> findById(@PathVariable("id") long id) throws ControllerException {
-        Optional<GiftCertificate> giftCertificate;
+    @GetMapping(value = "/{certificate_id}")
+    public ResponseEntity<GiftCertificateDTO> findById(@PathVariable("certificate_id") long certificateId) throws ControllerException {
+        GiftCertificateDTO giftCertificateDTO;
         try {
-            giftCertificate = giftCertificateService.findById(id);
+            giftCertificateDTO = certificateConverter.convertToGiftCertificateDTO(giftCertificateService.findById(certificateId));
+            initializeGiftCertificateDTOWithLinks(giftCertificateDTO);
+            initializeTagDTOListWithLink(giftCertificateDTO.getTagDTOList());
         } catch (ServiceException e) {
             throw new ControllerException(e);
         }
-        return giftCertificate.map(certificate -> ResponseEntity.status(HttpStatus.OK).body(certificate))
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NO_CONTENT).build());
+        return new ResponseEntity<>(giftCertificateDTO, HttpStatus.OK);
     }
 
     /**
-     * Find all certificate by tag name response entity.
+     * Search all certificate by tag name response entity.
      *
-     * @param tag the tag
+     * @param tagName            the tag name
+     * @param pageable           the pageable
+     * @param resourcesAssembler the resources assembler
      * @return the response entity
      * @throws ControllerException the controller exception
      */
     @GetMapping(value = "/search/by/tag/name")
-    public ResponseEntity<List<GiftCertificate>> findAllCertificateByTagName(@RequestBody @Valid Tag tag) throws ControllerException {
-        List<GiftCertificate> giftCertificateList;
+    public ResponseEntity<PagedModel<EntityModel<GiftCertificateDTO>>> searchAllCertificateByTagName(@RequestParam("tag_name") String tagName, Pageable pageable,
+                                                                                                     PagedResourcesAssembler<GiftCertificateDTO> resourcesAssembler) throws ControllerException {
+        Page<GiftCertificateDTO> giftCertificateDTOS;
+        PagedModel<EntityModel<GiftCertificateDTO>> pagedModel;
         try {
-            giftCertificateList = giftCertificateService.findAllCertificateByTagName(tag.getName());
+            giftCertificateDTOS = MapperUtil.convertList(giftCertificateService.findAllCertificateByTagName(tagName, pageable), certificateConverter::convertToGiftCertificateDTO);
+            initializeGiftCertificateDTOListWithLinks(giftCertificateDTOS);
         } catch (ServiceException e) {
             throw new ControllerException(e);
         }
-        return giftCertificateList.isEmpty() ? ResponseEntity.status(HttpStatus.NO_CONTENT).build() :
-                ResponseEntity.status(HttpStatus.OK).body(giftCertificateList);
+        pagedModel = resourcesAssembler.toModel(giftCertificateDTOS);
+        initializePageModel(pagedModel, pageable, resourcesAssembler);
+        return giftCertificateDTOS.isEmpty() ? new ResponseEntity<>(HttpStatus.NO_CONTENT) :
+                new ResponseEntity<>(pagedModel, HttpStatus.OK);
     }
 
     /**
-     * Find all certificate by name or description response entity.
+     * Search certificate by name or description response entity.
      *
-     * @param name        the name
-     * @param description the description
+     * @param name               the name
+     * @param description        the description
+     * @param pageable           the pageable
+     * @param resourcesAssembler the resources assembler
      * @return the response entity
      * @throws ControllerException the controller exception
      */
     @GetMapping(value = "/search/by/name/description")
-    public ResponseEntity<List<GiftCertificate>> findAllCertificateByNameOrDescription(
-            @RequestParam(value = "name", defaultValue = "-") String name,
-            @RequestParam(value = "description", defaultValue = "-") String description) throws ControllerException {
-        List<GiftCertificate> giftCertificateList;
+    public ResponseEntity<PagedModel<EntityModel<GiftCertificateDTO>>> searchCertificateByNameOrDescription(
+                        @RequestParam(value = "name", defaultValue = "-") String name,
+                        @RequestParam(value = "description", defaultValue = "-") String description,
+                        Pageable pageable, PagedResourcesAssembler<GiftCertificateDTO> resourcesAssembler) throws ControllerException {
+        Page<GiftCertificateDTO> giftCertificateDTOS;
+        PagedModel<EntityModel<GiftCertificateDTO>> pagedModel;
         try {
-            giftCertificateList = giftCertificateService.findAllCertificateByNameOrDescription(name, description);
+            giftCertificateDTOS = MapperUtil.convertList(giftCertificateService.findAllCertificateByNameOrDescription(name, description, pageable),
+                    certificateConverter::convertToGiftCertificateDTO);
+            initializeGiftCertificateDTOListWithLinks(giftCertificateDTOS);
         } catch (ServiceException e) {
             throw new ControllerException(e);
         }
-        return giftCertificateList.isEmpty() ? ResponseEntity.status(HttpStatus.NO_CONTENT).build() :
-                ResponseEntity.status(HttpStatus.OK).body(giftCertificateList);
+        pagedModel = resourcesAssembler.toModel(giftCertificateDTOS);
+        initializePageModel(pagedModel, pageable, resourcesAssembler);
+        return giftCertificateDTOS.isEmpty() ? new ResponseEntity<>(HttpStatus.NO_CONTENT) :
+                new ResponseEntity<>(pagedModel, HttpStatus.OK);
     }
 
     /**
@@ -148,66 +177,99 @@ public class GiftCertificateController {
     /**
      * Find all sorted certificate by date response entity.
      *
-     * @param orderBy the type
+     * @param orderBy            the order by
+     * @param pageable           the pageable
+     * @param resourcesAssembler the resources assembler
      * @return the response entity
-     * @throws ServiceException the service exception
+     * @throws ControllerException the controller exception
      */
     @GetMapping("/sort/date")
-    public ResponseEntity<List<GiftCertificate>> findAllSortedCertificateByDate(@RequestParam("order_by") String orderBy)
-            throws ServiceException {
-       List<GiftCertificate> certificateList = giftCertificateService.findAllCertificateByDate(orderBy);
-        return certificateList.isEmpty() ? ResponseEntity.status(HttpStatus.NO_CONTENT).build() :
-                ResponseEntity.status(HttpStatus.OK).body(certificateList);
+    public ResponseEntity<PagedModel<EntityModel<GiftCertificateDTO>>> findAllSortedCertificateByDate(@RequestParam("order_by") String orderBy,
+                                    Pageable pageable, PagedResourcesAssembler<GiftCertificateDTO> resourcesAssembler) throws ControllerException {
+        Page<GiftCertificateDTO> giftCertificateDTOS;
+        PagedModel<EntityModel<GiftCertificateDTO>> pagedModel;
+        try {
+            giftCertificateDTOS = MapperUtil.convertList(giftCertificateService.findAllCertificateByDate(orderBy, pageable), certificateConverter::convertToGiftCertificateDTO);
+            initializeGiftCertificateDTOListWithLinks(giftCertificateDTOS);
+        } catch (ServiceException e) {
+            throw new ControllerException(e);
+        }
+        pagedModel = resourcesAssembler.toModel(giftCertificateDTOS);
+        initializePageModel(pagedModel, pageable, resourcesAssembler);
+        return giftCertificateDTOS.isEmpty() ? new ResponseEntity<>(HttpStatus.NO_CONTENT) :
+                new ResponseEntity<>(pagedModel, HttpStatus.OK);
     }
 
     /**
      * Find all sorted certificate by name response entity.
      *
-     * @param orderBy the type
+     * @param orderBy            the order by
+     * @param pageable           the pageable
+     * @param resourcesAssembler the resources assembler
      * @return the response entity
-     * @throws ServiceException the service exception
+     * @throws ControllerException the controller exception
      */
     @GetMapping("/sort/name")
-    public ResponseEntity<List<GiftCertificate>> findAllSortedCertificateByName(@RequestParam("order_by") String orderBy)
-            throws ServiceException {
-        List<GiftCertificate> certificateList = giftCertificateService.findAllCertificateByName(orderBy);
-        return certificateList.isEmpty() ? ResponseEntity.status(HttpStatus.NO_CONTENT).build() :
-                ResponseEntity.status(HttpStatus.OK).body(certificateList);
-    }
-    
-    @GetMapping("/search/by/tags")
-    public ResponseEntity<List<GiftCertificate>> findAllByTags(@RequestParam("tag_id") String strTagId) throws ControllerException {
+    public ResponseEntity<PagedModel<EntityModel<GiftCertificateDTO>>> findAllSortedCertificateByName(@RequestParam("order_by") String orderBy,
+                                                      Pageable pageable, PagedResourcesAssembler<GiftCertificateDTO> resourcesAssembler) throws ControllerException {
+        Page<GiftCertificateDTO> giftCertificateDTOS;
+        PagedModel<EntityModel<GiftCertificateDTO>> pagedModel;
         try {
-            List<GiftCertificate> certificateList = giftCertificateService.findAllByTagIdList(strTagId);
-            return new ResponseEntity<>(certificateList, HttpStatus.OK);
+            giftCertificateDTOS = MapperUtil.convertList(giftCertificateService.findAllCertificateByName(orderBy, pageable), certificateConverter::convertToGiftCertificateDTO);
+            initializeGiftCertificateDTOListWithLinks(giftCertificateDTOS);
         } catch (ServiceException e) {
             throw new ControllerException(e);
         }
+        pagedModel = resourcesAssembler.toModel(giftCertificateDTOS);
+        initializePageModel(pagedModel, pageable, resourcesAssembler);
+        return giftCertificateDTOS.isEmpty() ? ResponseEntity.status(HttpStatus.NO_CONTENT).build() :
+                new ResponseEntity<>(pagedModel, HttpStatus.OK);
     }
 
     /**
-     * error method for incorrect url
+     * Search by tags response entity.
      *
+     * @param strTagId           the str tag id
+     * @param pageable           the pageable
+     * @param resourcesAssembler the resources assembler
      * @return the response entity
+     * @throws ControllerException the controller exception
      */
-    @GetMapping(value = "/error", consumes = MediaType.ALL_VALUE)
-    public ResponseEntity<String> error() {
-        return new ResponseEntity<>(getMessageForLocale("incorrect.url"), HttpStatus.BAD_REQUEST);
+    @GetMapping("/search/by/tags")
+    public ResponseEntity<PagedModel<EntityModel<GiftCertificateDTO>>> searchByTags(@RequestParam("tag_ids") String strTagId,
+                                                                                    Pageable pageable,
+                                                                                    PagedResourcesAssembler<GiftCertificateDTO> resourcesAssembler) throws ControllerException {
+        Page<GiftCertificateDTO> giftCertificateDTOS;
+        PagedModel<EntityModel<GiftCertificateDTO>> pagedModel;
+        try {
+            giftCertificateDTOS = MapperUtil.convertList(giftCertificateService.findAllByTagIdList(strTagId, pageable), certificateConverter::convertToGiftCertificateDTO);
+            initializeGiftCertificateDTOListWithLinks(giftCertificateDTOS);
+        } catch (ServiceException e) {
+            throw new ControllerException(e);
+        }
+        pagedModel = resourcesAssembler.toModel(giftCertificateDTOS);
+        initializePageModel(pagedModel, pageable, resourcesAssembler);
+        return giftCertificateDTOS.isEmpty() ? ResponseEntity.status(HttpStatus.NO_CONTENT).build() :
+                new ResponseEntity<>(pagedModel, HttpStatus.OK);
     }
 
     /**
      * Create gift certificate response entity.
      *
-     * @param giftCertificate the gift certificate
+     * @param giftCertificateDTO the gift certificate dto
      * @return the response entity
      * @throws ControllerException the controller exception
      */
     @PostMapping()
-    public ResponseEntity<Object> createGiftCertificate(@Valid @RequestBody GiftCertificate giftCertificate)
+    public ResponseEntity<GiftCertificateDTO> createGiftCertificate(@Valid @RequestBody GiftCertificateDTO giftCertificateDTO)
             throws ControllerException {
+        GiftCertificate certificate = certificateConverter.convertToGiftCertificate(giftCertificateDTO);
         try {
-            GiftCertificate certificate = giftCertificateService.create(giftCertificate);
-            return  ResponseEntity.status(HttpStatus.CREATED).body(certificate);
+            certificate = giftCertificateService.create(certificate);
+            giftCertificateDTO = certificateConverter.convertToGiftCertificateDTO(certificate);
+            initializeTagDTOListWithLink(giftCertificateDTO.getTagDTOList());
+            initializeGiftCertificateDTOWithLinks(giftCertificateDTO);
+            return  new ResponseEntity<>(giftCertificateDTO, HttpStatus.CREATED);
         } catch (ServiceException e) {
             throw new ControllerException(e);
         }
@@ -220,35 +282,70 @@ public class GiftCertificateController {
      * @return the response entity
      * @throws ControllerException the controller exception
      */
-    @DeleteMapping(value = "/{id}")
-    public ResponseEntity<Object> removeById(@PathVariable("id") long id) throws ControllerException {
+    @DeleteMapping(value = "/{certificate_id}")
+    public ResponseEntity<Long> removeById(@PathVariable("certificate_id") long id) throws ControllerException {
         try {
-            return giftCertificateService.removeById(id) ? ResponseEntity.status(HttpStatus.OK).body(id) :
-                    ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        } catch (ServiceException e) {
+            return giftCertificateService.removeById(id) ? new ResponseEntity<>(id, HttpStatus.OK) :
+                    new ResponseEntity<>(HttpStatus.OK);
+        }catch (ServiceException e) {
             throw new ControllerException(e);
         }
     }
 
     /**
-     * Update bi id response entity.
+     * Update by id response entity.
      *
-     * @param id              the id
-     * @param giftCertificate the gift certificate
+     * @param id                 the id
+     * @param giftCertificateDTO the gift certificate dto
      * @return the response entity
      * @throws ControllerException the controller exception
      */
-    @PatchMapping("/{id}")
-    public ResponseEntity<GiftCertificate> updateBiId(@PathVariable("id") long id,
-                                             @RequestBody @Valid GiftCertificate giftCertificate) throws ControllerException {
+    @PatchMapping("/{certificate_id}")
+    public ResponseEntity<GiftCertificateDTO> updateById(@PathVariable("certificate_id") long id,
+                                                      @RequestBody GiftCertificateDTO giftCertificateDTO) throws ControllerException {
+        GiftCertificate giftCertificate = certificateConverter.convertToGiftCertificate(giftCertificateDTO);
         giftCertificate.setId(id);
         try {
-            GiftCertificate updateGiftCertificate = giftCertificateService.updateById(giftCertificate);
-            return new ResponseEntity<>(updateGiftCertificate, HttpStatus.OK);
+            giftCertificate = giftCertificateService.updateById(giftCertificate);
+            giftCertificateDTO = certificateConverter.convertToGiftCertificateDTO(giftCertificate);
+            initializeTagDTOListWithLink(giftCertificateDTO.getTagDTOList());
+            initializeGiftCertificateDTOWithLinks(giftCertificateDTO);
+            return new ResponseEntity<>(giftCertificateDTO, HttpStatus.OK);
         } catch (ServiceException e) {
             throw new ControllerException(e);
         }
     }
 
+    private void initializeGiftCertificateDTOWithLinks(GiftCertificateDTO giftCertificateDTO) throws ControllerException {
+        giftCertificateDTO.add(linkTo(methodOn(GiftCertificateController.class).removeById(giftCertificateDTO.getId())).withSelfRel().withType(HttpMethod.DELETE.name()))
+                .add(linkTo(GiftCertificateController.class).slash(giftCertificateDTO.getId()).withSelfRel().withType(HttpMethod.PATCH.name()));
+    }
 
+    private void initializeGiftCertificateDTOListWithLinks(Page<GiftCertificateDTO> certificatePage) throws ControllerException {
+        for (var i: certificatePage) {
+            i.add(linkTo(methodOn(GiftCertificateController.class).findById(i.getId())).withSelfRel().withType(HttpMethod.GET.name()))
+                    .add(linkTo(methodOn(GiftCertificateController.class).removeById(i.getId())).withSelfRel().withType(HttpMethod.DELETE.name()))
+                    .add(linkTo(GiftCertificateController.class).slash(i.getId()).withSelfRel().withType(HttpMethod.PATCH.name()));
+            initializeTagDTOListWithLink(i.getTagDTOList());
+        }
+    }
+
+    private void initializePageModel(PagedModel<EntityModel<GiftCertificateDTO>> pagedModel, Pageable pageable, PagedResourcesAssembler<GiftCertificateDTO> resourcesAssembler) throws ControllerException {
+        String name = "name";
+        String description = "description";
+        pagedModel.add(linkTo(methodOn(GiftCertificateController.class).findAllSortedCertificateByName(Sort.Direction.ASC.name(), pageable, resourcesAssembler)).withSelfRel().withType(HttpMethod.GET.name()))
+                .add(linkTo(methodOn(GiftCertificateController.class).findAllSortedCertificateByDate(Sort.Direction.ASC.name(), pageable, resourcesAssembler)).withSelfRel().withType(HttpMethod.GET.name()))
+                .add(linkTo(methodOn(GiftCertificateController.class).searchCertificateByNameOrDescription(name, description, pageable, resourcesAssembler)).withSelfRel().withType(HttpMethod.GET.name()))
+                .add(linkTo(methodOn(GiftCertificateController.class).searchAllCertificateByTagName(name, pageable, resourcesAssembler)).withSelfRel().withType(HttpMethod.GET.name()))
+                .add(linkTo(GiftCertificateController.class).withSelfRel().withType(HttpMethod.POST.name()))
+                .add(linkTo(methodOn(GiftCertificateController.class).findAll(pageable, resourcesAssembler)).withSelfRel().withType(HttpMethod.GET.name()));
+    }
+
+    private void initializeTagDTOListWithLink(List<TagDTO> tagDTOPage) throws ControllerException {
+        final String tag = "tag";
+        for (var i: tagDTOPage) {
+            i.add(linkTo(methodOn(TagController.class).findById(i.getId())).withRel(tag).withType(HttpMethod.GET.name()))
+                    .add(linkTo(methodOn(TagController.class).remove(i.getId())).withRel(tag).withType(HttpMethod.DELETE.name()));
+        }
+    }
 }
