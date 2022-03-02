@@ -1,6 +1,6 @@
 package com.epam.esm.controller;
 
-import com.epam.esm.config.MapperUtil;
+import com.epam.esm.util.MapperUtil;
 import com.epam.esm.dto.converter.GiftCertificateConverter;
 import com.epam.esm.dto.entity.GiftCertificateDTO;
 import com.epam.esm.dto.entity.TagDTO;
@@ -19,6 +19,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -57,7 +58,8 @@ public class GiftCertificateController {
      * @param giftCertificateService the gift certificate service
      * @param certificateConverter   the certificate converter
      */
-    public GiftCertificateController(GiftCertificateService giftCertificateService, GiftCertificateConverter certificateConverter) {
+    public GiftCertificateController(GiftCertificateService giftCertificateService,
+                                     GiftCertificateConverter certificateConverter) {
         this.giftCertificateService = giftCertificateService;
         this.certificateConverter = certificateConverter;
     }
@@ -76,7 +78,9 @@ public class GiftCertificateController {
         Page<GiftCertificateDTO> giftCertificateDTOS;
         PagedModel<EntityModel<GiftCertificateDTO>> pagedModel;
         try {
-            giftCertificateDTOS = MapperUtil.convertList(giftCertificateService.findAll(pageable), certificateConverter::convertToGiftCertificateDTO);
+            giftCertificateDTOS = MapperUtil
+                    .convertList(giftCertificateService.findAll(pageable),
+                            certificateConverter::convertToGiftCertificateDTO);
             initializeGiftCertificateDTOListWithLinks(giftCertificateDTOS);
         } catch (ServiceException e) {
             throw new ControllerException(e);
@@ -99,7 +103,8 @@ public class GiftCertificateController {
     public ResponseEntity<GiftCertificateDTO> findById(@PathVariable("certificate_id") long certificateId) throws ControllerException {
         GiftCertificateDTO giftCertificateDTO;
         try {
-            giftCertificateDTO = certificateConverter.convertToGiftCertificateDTO(giftCertificateService.findById(certificateId));
+            giftCertificateDTO = certificateConverter
+                    .convertToGiftCertificateDTO(giftCertificateService.findById(certificateId));
             initializeGiftCertificateDTOWithLinks(giftCertificateDTO);
             initializeTagDTOListWithLink(giftCertificateDTO.getTagDTOList());
         } catch (ServiceException e) {
@@ -123,7 +128,9 @@ public class GiftCertificateController {
         Page<GiftCertificateDTO> giftCertificateDTOS;
         PagedModel<EntityModel<GiftCertificateDTO>> pagedModel;
         try {
-            giftCertificateDTOS = MapperUtil.convertList(giftCertificateService.findAllCertificateByTagName(tagName, pageable), certificateConverter::convertToGiftCertificateDTO);
+            giftCertificateDTOS = MapperUtil
+                    .convertList(giftCertificateService.findAllCertificateByTagName(tagName, pageable),
+                            certificateConverter::convertToGiftCertificateDTO);
             initializeGiftCertificateDTOListWithLinks(giftCertificateDTOS);
         } catch (ServiceException e) {
             throw new ControllerException(e);
@@ -152,7 +159,8 @@ public class GiftCertificateController {
         Page<GiftCertificateDTO> giftCertificateDTOS;
         PagedModel<EntityModel<GiftCertificateDTO>> pagedModel;
         try {
-            giftCertificateDTOS = MapperUtil.convertList(giftCertificateService.findAllCertificateByNameOrDescription(name, description, pageable),
+            giftCertificateDTOS = MapperUtil
+                    .convertList(giftCertificateService.findAllCertificateByNameOrDescription(name, description, pageable),
                     certificateConverter::convertToGiftCertificateDTO);
             initializeGiftCertificateDTOListWithLinks(giftCertificateDTOS);
         } catch (ServiceException e) {
@@ -189,7 +197,9 @@ public class GiftCertificateController {
         Page<GiftCertificateDTO> giftCertificateDTOS;
         PagedModel<EntityModel<GiftCertificateDTO>> pagedModel;
         try {
-            giftCertificateDTOS = MapperUtil.convertList(giftCertificateService.findAllCertificateByDate(orderBy, pageable), certificateConverter::convertToGiftCertificateDTO);
+            giftCertificateDTOS = MapperUtil
+                    .convertList(giftCertificateService.findAllCertificateByDate(orderBy, pageable),
+                            certificateConverter::convertToGiftCertificateDTO);
             initializeGiftCertificateDTOListWithLinks(giftCertificateDTOS);
         } catch (ServiceException e) {
             throw new ControllerException(e);
@@ -215,7 +225,9 @@ public class GiftCertificateController {
         Page<GiftCertificateDTO> giftCertificateDTOS;
         PagedModel<EntityModel<GiftCertificateDTO>> pagedModel;
         try {
-            giftCertificateDTOS = MapperUtil.convertList(giftCertificateService.findAllCertificateByName(orderBy, pageable), certificateConverter::convertToGiftCertificateDTO);
+            giftCertificateDTOS = MapperUtil
+                    .convertList(giftCertificateService.findAllCertificateByName(orderBy, pageable),
+                            certificateConverter::convertToGiftCertificateDTO);
             initializeGiftCertificateDTOListWithLinks(giftCertificateDTOS);
         } catch (ServiceException e) {
             throw new ControllerException(e);
@@ -242,7 +254,9 @@ public class GiftCertificateController {
         Page<GiftCertificateDTO> giftCertificateDTOS;
         PagedModel<EntityModel<GiftCertificateDTO>> pagedModel;
         try {
-            giftCertificateDTOS = MapperUtil.convertList(giftCertificateService.findAllByTagIdList(strTagId, pageable), certificateConverter::convertToGiftCertificateDTO);
+            giftCertificateDTOS = MapperUtil
+                    .convertList(giftCertificateService.findAllByTagIdList(strTagId, pageable),
+                            certificateConverter::convertToGiftCertificateDTO);
             initializeGiftCertificateDTOListWithLinks(giftCertificateDTOS);
         } catch (ServiceException e) {
             throw new ControllerException(e);
@@ -261,6 +275,7 @@ public class GiftCertificateController {
      * @throws ControllerException the controller exception
      */
     @PostMapping()
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<GiftCertificateDTO> createGiftCertificate(@Valid @RequestBody GiftCertificateDTO giftCertificateDTO)
             throws ControllerException {
         GiftCertificate certificate = certificateConverter.convertToGiftCertificate(giftCertificateDTO);
@@ -283,6 +298,7 @@ public class GiftCertificateController {
      * @throws ControllerException the controller exception
      */
     @DeleteMapping(value = "/{certificate_id}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<Long> removeById(@PathVariable("certificate_id") long id) throws ControllerException {
         try {
             return giftCertificateService.removeById(id) ? new ResponseEntity<>(id, HttpStatus.OK) :
@@ -301,6 +317,7 @@ public class GiftCertificateController {
      * @throws ControllerException the controller exception
      */
     @PatchMapping("/{certificate_id}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<GiftCertificateDTO> updateById(@PathVariable("certificate_id") long id,
                                                       @RequestBody GiftCertificateDTO giftCertificateDTO) throws ControllerException {
         GiftCertificate giftCertificate = certificateConverter.convertToGiftCertificate(giftCertificateDTO);
@@ -342,7 +359,7 @@ public class GiftCertificateController {
     }
 
     private void initializeTagDTOListWithLink(List<TagDTO> tagDTOPage) throws ControllerException {
-        final String tag = "tag";
+        String tag = "tag";
         for (var i: tagDTOPage) {
             i.add(linkTo(methodOn(TagController.class).findById(i.getId())).withRel(tag).withType(HttpMethod.GET.name()))
                     .add(linkTo(methodOn(TagController.class).remove(i.getId())).withRel(tag).withType(HttpMethod.DELETE.name()));

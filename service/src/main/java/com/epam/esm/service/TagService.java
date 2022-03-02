@@ -40,10 +40,11 @@ public interface TagService {
     /**
      * Find all mostly used tag by order price tag.
      *
+     * @param userId the user id
      * @return the tag
      * @throws ServiceException the service exception
      */
-    Tag findAllMostlyUsedTagByOrderPrice() throws ServiceException;
+    Tag findAllMostlyUsedTagByOrderPrice(long userId) throws ServiceException;
 
     /**
      * Find by id tag.

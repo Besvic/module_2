@@ -84,7 +84,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
 
     @Override
     public Page<GiftCertificate> findAllCertificateByTagName(String tagName, Pageable pageable) throws ServiceException {
-        Page<GiftCertificate> certificateList = giftCertificateRepository.findGiftCertificatesByTagList_Name(tagName, pageable);
+        Page<GiftCertificate> certificateList = giftCertificateRepository.findGiftCertificatesByTagListName(tagName, pageable);
         return checkValueListGiftCertificate(certificateList);
     }
 

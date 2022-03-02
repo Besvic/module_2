@@ -82,8 +82,8 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public Tag findAllMostlyUsedTagByOrderPrice() throws ServiceException {
-        List<Tag> tagList = tagRepository.findAllMostlyUsedTagByOrderPrice();
+    public Tag findAllMostlyUsedTagByOrderPrice(long userId) throws ServiceException {
+        List<Tag> tagList = tagRepository.findAllMostlyUsedTagByOrderPrice(userId);
         return checkValueOptionalGiftCertificate(tagList.stream().findFirst());
     }
 

@@ -1,6 +1,6 @@
 package com.epam.esm.controller;
 
-import com.epam.esm.config.MapperUtil;
+import com.epam.esm.util.MapperUtil;
 import com.epam.esm.dto.converter.TagConverter;
 import com.epam.esm.dto.entity.TagDTO;
 import com.epam.esm.entity.Tag;
@@ -17,6 +17,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -45,7 +46,8 @@ public class TagController {
      * @param tagService   the tag service
      * @param tagConverter the tag converter
      */
-    public TagController(TagService tagService, TagConverter tagConverter) {
+    public TagController(TagService tagService,
+                         TagConverter tagConverter) {
         this.tagService = tagService;
         this.tagConverter = tagConverter;
     }
@@ -59,7 +61,9 @@ public class TagController {
      * @throws ControllerException the controller exception
      */
     @GetMapping()
-    public ResponseEntity<PagedModel<EntityModel<TagDTO>>> findAll(Pageable pageable, PagedResourcesAssembler<TagDTO> resourcesAssembler) throws ControllerException {
+    @PreAuthorize("hasAnyRole('GUEST', 'USER', 'ADMIN')")
+    public ResponseEntity<PagedModel<EntityModel<TagDTO>>> findAll(Pageable pageable,
+                       PagedResourcesAssembler<TagDTO> resourcesAssembler) throws ControllerException {
         Page<TagDTO> tagDTOS;
         PagedModel<EntityModel<TagDTO>> pagedModel;
         try {
@@ -71,30 +75,11 @@ public class TagController {
             throw new ControllerException(e);
         }
         pagedModel = resourcesAssembler.toModel(tagDTOS);
-        pagedModel.add(linkTo(methodOn(TagController.class).searchMostlyUsedTagByOrderPrice()).withSelfRel().withType(HttpMethod.GET.name()))
+        pagedModel
                 .add(linkTo(methodOn(TagController.class).findAll(pageable, resourcesAssembler)).withSelfRel().withType(HttpMethod.GET.name()))
                 .add(linkTo(methodOn(TagController.class)).withSelfRel().withType(HttpMethod.POST.name()));
         return tagDTOS.isEmpty() ? new ResponseEntity<>(HttpStatus.NO_CONTENT) :
                 new ResponseEntity<>(pagedModel, HttpStatus.OK);
-    }
-
-    /**
-     * Search mostly used tag by order price response entity.
-     *
-     * @return the response entity
-     * @throws ControllerException the controller exception
-     */
-    @GetMapping(value = "/search")
-    public ResponseEntity<TagDTO> searchMostlyUsedTagByOrderPrice()
-            throws ControllerException {
-        TagDTO tagDTO;
-        try {
-            tagDTO = tagConverter.convertToTagDTO(tagService.findAllMostlyUsedTagByOrderPrice());
-            initializeTagDTOWithLink(tagDTO);
-        } catch (ServiceException e) {
-            throw new ControllerException(e);
-        }
-        return new ResponseEntity<>(tagDTO, HttpStatus.OK);
     }
 
 
@@ -106,6 +91,7 @@ public class TagController {
      * @throws ControllerException the controller exception
      */
     @GetMapping("/{tag_id}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<TagDTO> findById(@PathVariable("tag_id") long tagId) throws ControllerException {
         TagDTO tagDTO;
         try {
@@ -125,6 +111,7 @@ public class TagController {
      * @throws ControllerException the controller exception
      */
     @PostMapping()
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<TagDTO> create(@RequestBody TagDTO tagDTO) throws ControllerException {
         Tag tag = tagConverter.converterToTag(tagDTO);
         try {
@@ -144,6 +131,7 @@ public class TagController {
      * @throws ControllerException the controller exception
      */
     @DeleteMapping("/{tag_id}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<Long> remove(@PathVariable("tag_id") long tagId) throws ControllerException {
         try {
             return tagService.removeById(tagId) ? new ResponseEntity<>(tagId, HttpStatus.OK)

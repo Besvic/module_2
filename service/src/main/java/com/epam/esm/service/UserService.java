@@ -55,4 +55,12 @@ public interface UserService {
      * @throws ServiceException the service exception
      */
     long deleteById(long id) throws ServiceException;
+
+    /**
+     * Exist by email boolean.
+     *
+     * @param email user email
+     * @return boolean value
+     */
+    boolean existByEmail(String email);
 }

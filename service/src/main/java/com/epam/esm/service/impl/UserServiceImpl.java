@@ -7,6 +7,7 @@ import com.epam.esm.service.UserService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -21,19 +22,23 @@ import static com.epam.esm.util.LocalizedMessage.getMessageForLocale;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     /**
      * Instantiates a new User service.
      *
-     * @param userRepository the user repository
+     * @param userRepository        the user repository
+     * @param bCryptPasswordEncoder the crypt password
      */
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.userRepository = userRepository;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
     @Override
     public User create(User user) throws ServiceException {
         try {
+            user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
             return userRepository.save(user);
         }catch (Exception e){
             log.error(getMessageForLocale("impossible.create.user"), e);
@@ -83,4 +88,8 @@ public class UserServiceImpl implements UserService {
     }
 
 
+    @Override
+    public boolean existByEmail(String email) {
+        return userRepository.existsByEmail(email);
+    }
 }

@@ -63,14 +63,14 @@ class OrderServiceImplTest {
 
     @Test
     void findAllByUserId() throws ServiceException {
-        when(orderRepository.findAllByUser_Id(1L, pageable)).thenReturn(orderPage);
+        when(orderRepository.findAllByUserId(1L, pageable)).thenReturn(orderPage);
         Page<Order> actual = orderService.findAllByUserId(1L, pageable);
         assertEquals(orderPage, actual);
     }
 
     @Test
     void findAllByUserIdEmpty() {
-        when(orderRepository.findAllByUser_Id(1L, pageable)).thenReturn(Page.empty());
+        when(orderRepository.findAllByUserId(1L, pageable)).thenReturn(Page.empty());
         assertThrows(ServiceException.class, () -> orderService.findAllByUserId(1L, pageable));
     }
 

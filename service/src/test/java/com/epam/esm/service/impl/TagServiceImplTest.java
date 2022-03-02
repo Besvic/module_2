@@ -80,8 +80,8 @@ class TagServiceImplTest {
     @Test
     void findAllMostlyUsedTagByOrderPrice() throws ServiceException {
         Tag tag = new Tag(1, "name");
-        when(tagDao.findAllMostlyUsedTagByOrderPrice()).thenReturn(Collections.singletonList(tag));
-        Tag actual = tagService.findAllMostlyUsedTagByOrderPrice();
+        when(tagDao.findAllMostlyUsedTagByOrderPrice(1L)).thenReturn(Collections.singletonList(tag));
+        Tag actual = tagService.findAllMostlyUsedTagByOrderPrice(1L);
         assertEquals(tag, actual);
     }
 

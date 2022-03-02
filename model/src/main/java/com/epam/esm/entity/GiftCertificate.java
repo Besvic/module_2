@@ -55,6 +55,5 @@ public class GiftCertificate implements Serializable {
 
     @JsonIgnore
     @ManyToOne(cascade = {CascadeType.MERGE})
-    @JoinColumn(name = "order_id")
     private Order order;
 }

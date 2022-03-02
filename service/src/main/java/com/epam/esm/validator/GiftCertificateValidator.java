@@ -53,7 +53,7 @@ public class GiftCertificateValidator {
      * @return the boolean
      */
     public boolean isDescription(String description){
-        return description != null && !description.isEmpty() && description.matches(REGEX_CORRECT_DESCRIPTION);
+        return (description != null) && (!description.isEmpty()) && (description.matches(REGEX_CORRECT_DESCRIPTION));
     }
 }
 

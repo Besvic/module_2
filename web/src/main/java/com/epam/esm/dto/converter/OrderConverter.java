@@ -1,6 +1,6 @@
 package com.epam.esm.dto.converter;
 
-import com.epam.esm.config.MapperUtil;
+import com.epam.esm.util.MapperUtil;
 import com.epam.esm.dto.entity.OrderDTO;
 import com.epam.esm.entity.Order;
 import org.modelmapper.ModelMapper;

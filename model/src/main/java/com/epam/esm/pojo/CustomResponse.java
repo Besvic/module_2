@@ -1,4 +1,4 @@
-package com.epam.esm.entity;
+package com.epam.esm.pojo;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;

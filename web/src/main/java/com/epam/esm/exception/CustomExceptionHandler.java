@@ -1,7 +1,6 @@
-package com.epam.esm.controller;
-import com.epam.esm.entity.CustomResponse;
-import com.epam.esm.exception.ControllerException;
-import com.epam.esm.exception.ServiceException;
+package com.epam.esm.exception;
+
+import com.epam.esm.pojo.CustomResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
