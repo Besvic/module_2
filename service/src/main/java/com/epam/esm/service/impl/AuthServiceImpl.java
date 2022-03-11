@@ -61,7 +61,7 @@ public class AuthServiceImpl implements AuthService {
     public User registration(SignUpRequest signUpRequest) throws ServiceException {
         if (userService.existByEmail(signUpRequest.getEmail())){
             log.warn(getMessageForLocale("change.email"));
-            throw new ServiceException("change.email");
+            throw new ServiceException(getMessageForLocale("change.email"));
         }
 
         User user = User.builder()

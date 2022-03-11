@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,18 +65,10 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Page<Order> findAllByUserId(long userId, Pageable pageable) throws ServiceException {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getPrincipal();
-        GrantedAuthority roleUser = new SimpleGrantedAuthority(ERole.ROLE_USER.name());
-        GrantedAuthority roleAdmin = new SimpleGrantedAuthority(ERole.ROLE_ADMIN.name());
         Page<Order> orderList;
-        if(userDetails.getAuthorities().contains(roleAdmin) ||
-                (userDetails.getAuthorities().contains(roleUser) &&
-                        userDetails.getId() == userId)){
+        if (checkAccessesByUserId(userId)){
             orderList = orderRepository.findAllByUserId(userId, pageable);
-        } else {
+        }else {
             log.warn(getMessageForLocale("define.accesses"));
             throw new ServiceException(getMessageForLocale("define.accesses"));
         }
@@ -88,16 +81,8 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Order findById(long orderId) throws ServiceException {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getPrincipal();
         Optional<Order> orderOptional;
-        GrantedAuthority roleUser = new SimpleGrantedAuthority(ERole.ROLE_USER.name());
-        GrantedAuthority roleAdmin = new SimpleGrantedAuthority(ERole.ROLE_ADMIN.name());
-        if (userDetails.getAuthorities().contains(roleAdmin) ||
-                    (userDetails.getAuthorities().contains(roleUser) &&
-                    orderRepository.existsByIdAndUserId(orderId, userDetails.getId()))){
+        if (checkAccessesByOrderId(orderId)){
             orderOptional = orderRepository.findById(orderId);
         }else{
             log.warn(getMessageForLocale("define.accesses"));
@@ -108,6 +93,16 @@ public class OrderServiceImpl implements OrderService {
         }
         log.warn(getMessageForLocale("order.not.found.by.id") + orderId);
         throw new ServiceException(getMessageForLocale("order.not.found.by.id") + orderId);
+    }
+
+    private boolean checkAccessesByOrderId(long orderId) throws ServiceException {
+        UserDetailsImpl userDetails = getUserDetails();
+
+        GrantedAuthority roleUser = new SimpleGrantedAuthority(ERole.ROLE_USER.name());
+        GrantedAuthority roleAdmin = new SimpleGrantedAuthority(ERole.ROLE_ADMIN.name());
+        return userDetails.getAuthorities().contains(roleAdmin) ||
+                (userDetails.getAuthorities().contains(roleUser) &&
+                        orderRepository.existsByIdAndUserId(orderId, userDetails.getId()));
     }
 
     @Override
@@ -141,19 +136,35 @@ public class OrderServiceImpl implements OrderService {
             throw new ServiceException(getMessageForLocale("insufficient.funds.balance"));
         }
         userOptional.get().setBalance(userOptional.get().getBalance().subtract(cost));
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getPrincipal();
-        GrantedAuthority roleUser = new SimpleGrantedAuthority(ERole.ROLE_USER.name());
-        GrantedAuthority roleAdmin = new SimpleGrantedAuthority(ERole.ROLE_ADMIN.name());
-        if (userDetails.getAuthorities().contains(roleAdmin) ||
-                (userDetails.getAuthorities().contains(roleUser) &&
-                        order.getUser().getId() == userDetails.getId())){
+        if (checkAccessesByUserId(order.getUser().getId())){
             return orderRepository.saveAndFlush(order);
         }else{
             log.warn(getMessageForLocale("define.accesses"));
             throw new ServiceException(getMessageForLocale("define.accesses"));
         }
     }
+
+
+    private boolean checkAccessesByUserId(long userId) throws ServiceException {
+        UserDetailsImpl userDetails = getUserDetails();
+        GrantedAuthority roleUser = new SimpleGrantedAuthority(ERole.ROLE_USER.name());
+        GrantedAuthority roleAdmin = new SimpleGrantedAuthority(ERole.ROLE_ADMIN.name());
+        return userDetails.getAuthorities().contains(roleAdmin) ||
+                (userDetails.getAuthorities().contains(roleUser) &&
+                        userDetails.getId() == userId);
+    }
+
+    private UserDetailsImpl getUserDetails() throws ServiceException {
+        Object object = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+        if (object instanceof UserDetails){
+            return (UserDetailsImpl) object;
+        }
+        log.error(getMessageForLocale("impossible.cast"));
+        throw new ServiceException(getMessageForLocale("impossible.cast"));
+    }
+
+
 }

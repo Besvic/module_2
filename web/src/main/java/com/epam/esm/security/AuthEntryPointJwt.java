@@ -13,6 +13,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+import static com.epam.esm.util.LocalizedMessage.getMessageForLocale;
+
 /**
  * The type Auth entry point jwt.
  */
@@ -32,7 +34,7 @@ public class AuthEntryPointJwt implements AuthenticationEntryPoint {
 
         CustomResponse customResponse = new CustomResponse();
         customResponse.setErrorCode("40102");
-        customResponse.setMessage(loginUrl);
+        customResponse.setMessage(getMessageForLocale("unauthorized") + loginUrl);
         ObjectMapper mapper = new ObjectMapper();
         mapper.writeValue(response.getOutputStream(), customResponse);
     }
