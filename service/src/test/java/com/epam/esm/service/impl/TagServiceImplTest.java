@@ -1,114 +1,101 @@
 package com.epam.esm.service.impl;
 
-import com.epam.esm.dao.TagDao;
-import com.epam.esm.dao.exception.DaoException;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ServiceException;
+import com.epam.esm.repository.TagRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TagServiceImplTest {
 
     @Mock
-    private TagDao tagDao;
+    private TagRepository tagDao;
+
+    @Mock
+    private Page<Tag> tagPage;
+
+    @Mock
+    private Pageable pageable;
 
     @InjectMocks
     private TagServiceImpl tagService;
 
     @Test
-    void create() throws ServiceException, DaoException {
-        when(tagDao.create(new Tag())).thenReturn(1L);
-        long actual = tagService.create(new Tag());
-        assertEquals(1L, actual);
+    void create() throws ServiceException {
+        Tag tag = new Tag(1, "name");
+        when(tagDao.save(tag)).thenReturn(tag);
+        Tag actual = tagService.create(tag);
+        assertEquals(tag, actual);
     }
 
     @Test
-    void removeById() throws ServiceException, DaoException {
-        when(tagDao.removeById(anyLong())).thenReturn(true);
+    void createThrowServiceException() {
+        Tag tag = new Tag(0, "name");
+        when(tagDao.save(tag)).thenReturn(tag);
+        assertThrows(ServiceException.class, () -> tagService.create(tag));
+    }
+
+    @Test
+    void removeById() throws ServiceException {
         boolean actual = tagService.removeById(anyLong());
         assertTrue(actual);
     }
 
     @Test
-    void findAll() throws ServiceException, DaoException {
-        when(tagDao.findAll()).thenReturn(Collections.singletonList(new Tag()));
-        List<Tag> expected = Collections.singletonList(new Tag());
-        List<Tag> actual = tagService.findAll();
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    void findById() throws ServiceException, DaoException {
-        when(tagDao.findById(anyLong())).thenReturn(Optional.of(new Tag()));
-        Optional<Tag> expected = Optional.of(new Tag());
-        Optional<Tag> actual = tagService.findById(anyLong());
-        assertEquals(expected, actual);
-    }
-
-    // false result
-
-    @Test
-    void createFalse() throws DaoException {
-        when(tagDao.create(new Tag())).thenReturn(0L);
-        assertThrows(ServiceException.class, () -> tagService.create(new Tag()));
-    }
-
-    @Test
-    void removeByIdFalse() throws DaoException {
-        when(tagDao.removeById(anyLong())).thenReturn(false);
+    void removeByIdThrowRuntimeException() {
+        doThrow(RuntimeException.class).when(tagDao).deleteById(anyLong());
         assertThrows(ServiceException.class, () -> tagService.removeById(anyLong()));
     }
 
     @Test
-    void findAllFalse() throws DaoException {
-        when(tagDao.findAll()).thenReturn(new ArrayList<>());
-        assertThrows(ServiceException.class, () -> tagService.findAll());
+    void findAll() throws ServiceException {
+        when(tagDao.findAll(pageable)).thenReturn(tagPage);
+        Page<Tag> expected = tagPage;
+        Page<Tag> actual = tagService.findAll(pageable);
+        assertEquals(expected, actual);
     }
 
     @Test
-    void findByIdFalse() throws DaoException {
+    void findAllEmpty() {
+        when(tagDao.findAll(pageable)).thenReturn(Page.empty());
+        assertThrows(ServiceException.class, () -> tagService.findAll(pageable));
+    }
+
+    @Test
+    void findAllMostlyUsedTagByOrderPrice() throws ServiceException {
+        Tag tag = new Tag(1, "name");
+        when(tagDao.findAllMostlyUsedTagByOrderPrice()).thenReturn(Collections.singletonList(tag));
+        Tag actual = tagService.findAllMostlyUsedTagByOrderPrice();
+        assertEquals(tag, actual);
+    }
+
+    @Test
+    void findById() throws ServiceException {
+        Tag tag = new Tag();
+        when(tagDao.findById(anyLong())).thenReturn(Optional.of(tag));
+        Tag actual = tagService.findById(anyLong());
+        assertEquals(tag, actual);
+    }
+
+    @Test
+    void findByIdEmpty() {
         when(tagDao.findById(anyLong())).thenReturn(Optional.empty());
-        assertThrows(ServiceException.class, () -> tagService.findById(anyLong()));
-    }
-
-    // throw exception result
-
-    @Test
-    void createThrowException() throws DaoException {
-        when(tagDao.create(new Tag())).thenThrow(DaoException.class);
-        assertThrows(ServiceException.class, () -> tagService.create(new Tag()));
-    }
-
-    @Test
-    void removeByIdThrowException() throws DaoException {
-        when(tagDao.removeById(anyLong())).thenThrow(DaoException.class);
-        assertThrows(ServiceException.class, () -> tagService.removeById(anyLong()));
-    }
-
-    @Test
-    void findAllThrowException() throws DaoException {
-        when(tagDao.findAll()).thenThrow(DaoException.class);
-        assertThrows(ServiceException.class, () -> tagService.findAll());
-    }
-
-    @Test
-    void findByIdThrowException() throws DaoException {
-        when(tagDao.findById(anyLong())).thenThrow(DaoException.class);
         assertThrows(ServiceException.class, () -> tagService.findById(anyLong()));
     }
 }

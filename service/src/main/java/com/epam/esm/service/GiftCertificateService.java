@@ -1,10 +1,10 @@
 package com.epam.esm.service;
 
+
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.exception.ServiceException;
-
-import java.util.List;
-import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
  * The interface Gift certificate service.
@@ -12,76 +12,91 @@ import java.util.Optional;
 public interface GiftCertificateService {
 
     /**
-     * Find all list.
+     * Find all page.
      *
-     * @return the list
+     * @param pageable the pageable
+     * @return the page
      * @throws ServiceException the service exception
      */
-    List<GiftCertificate> findAll() throws ServiceException;
+    Page<GiftCertificate> findAll(Pageable pageable) throws ServiceException;
 
     /**
-     * Find all certificate by tag name list.
+     * Find all certificate by tag name page.
      *
-     * @param tagName the tag name
-     * @return the list
+     * @param tagName  the tag name
+     * @param pageable the pageable
+     * @return the page
      * @throws ServiceException the service exception
      */
-    List<GiftCertificate> findAllCertificateByTagName(String tagName) throws ServiceException;
+    Page<GiftCertificate> findAllCertificateByTagName(String tagName, Pageable pageable) throws ServiceException;
 
     /**
-     * Find all certificate by name or description list.
+     * Find all certificate by name or description page.
      *
      * @param name        the name
      * @param description the description
-     * @return the list
+     * @param pageable    the pageable
+     * @return the page
      * @throws ServiceException the service exception
      */
-    List<GiftCertificate> findAllCertificateByNameOrDescription(String name, String description) throws ServiceException;
+    Page<GiftCertificate> findAllCertificateByNameOrDescription(String name, String description, Pageable pageable) throws ServiceException;
 
     /**
-     * Find all certificate by date list.
+     * Find all certificate by date page.
      *
-     * @param type the type
-     * @return the list
+     * @param type     the type
+     * @param pageable the pageable
+     * @return the page
      * @throws ServiceException the service exception
      */
-    List<GiftCertificate> findAllCertificateByDate(String type) throws ServiceException;
+    Page<GiftCertificate> findAllCertificateByDate(String type, Pageable pageable) throws ServiceException;
 
     /**
-     * Find all certificate by name list.
+     * Find all certificate by name page.
      *
-     * @param type the type
-     * @return the list
+     * @param type     the type
+     * @param pageable the pageable
+     * @return the page
      * @throws ServiceException the service exception
      */
-    List<GiftCertificate> findAllCertificateByName(String type) throws ServiceException;
+    Page<GiftCertificate> findAllCertificateByName(String type, Pageable pageable) throws ServiceException;
 
     /**
-     * Find by id optional.
+     * Find all by tag id list page.
+     *
+     * @param strTagId the str tag id
+     * @param pageable the pageable
+     * @return the page
+     * @throws ServiceException the service exception
+     */
+    Page<GiftCertificate> findAllByTagIdList(String strTagId, Pageable pageable) throws ServiceException;
+
+    /**
+     * Find by id gift certificate.
      *
      * @param id the id
-     * @return the optional
+     * @return the gift certificate
      * @throws ServiceException the service exception
      */
-    Optional<GiftCertificate> findById(long id) throws ServiceException;
+    GiftCertificate findById(long id) throws ServiceException;
 
     /**
-     * Create boolean.
+     * Create gift certificate.
      *
      * @param giftCertificate the gift certificate
-     * @return the boolean
+     * @return the gift certificate
      * @throws ServiceException the service exception
      */
     GiftCertificate create(GiftCertificate giftCertificate) throws ServiceException;
 
     /**
-     * Update by id boolean.
+     * Update by id gift certificate.
      *
      * @param currentGiftCertificate the current gift certificate
-     * @return the boolean
+     * @return the gift certificate
      * @throws ServiceException the service exception
      */
-    Optional<GiftCertificate> updateById(GiftCertificate currentGiftCertificate) throws ServiceException;
+    GiftCertificate updateById(GiftCertificate currentGiftCertificate) throws ServiceException;
 
     /**
      * Remove by id boolean.

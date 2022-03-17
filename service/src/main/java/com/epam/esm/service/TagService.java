@@ -2,9 +2,8 @@ package com.epam.esm.service;
 
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ServiceException;
-
-import java.util.List;
-import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
  * The interface Tag service.
@@ -12,38 +11,47 @@ import java.util.Optional;
 public interface TagService {
 
     /**
-     * Create boolean.
+     * Create tag.
      *
      * @param tag the tag
-     * @return the boolean
+     * @return the tag
      * @throws ServiceException the service exception
      */
-    long create(Tag tag) throws ServiceException;
+    Tag create(Tag tag) throws ServiceException;
 
     /**
      * Remove by id boolean.
      *
-     * @param id the id
+     * @param tagId the tag id
      * @return the boolean
      * @throws ServiceException the service exception
      */
-    boolean removeById(long id) throws ServiceException;
+    boolean removeById(long tagId) throws ServiceException;
 
     /**
-     * Find all list.
+     * Find all page.
      *
-     * @return the list
+     * @param pageable the pageable
+     * @return the page
      * @throws ServiceException the service exception
      */
-    List<Tag> findAll() throws ServiceException;
+    Page<Tag> findAll(Pageable pageable) throws ServiceException;
 
     /**
-     * Find by id optional.
+     * Find all mostly used tag by order price tag.
      *
-     * @param id the id
-     * @return the optional
+     * @return the tag
      * @throws ServiceException the service exception
      */
-    Optional<Tag> findById(long id) throws ServiceException;
+    Tag findAllMostlyUsedTagByOrderPrice() throws ServiceException;
+
+    /**
+     * Find by id tag.
+     *
+     * @param tagId the tag id
+     * @return the tag
+     * @throws ServiceException the service exception
+     */
+    Tag findById(long tagId) throws ServiceException;
 
 }

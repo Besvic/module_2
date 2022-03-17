@@ -1,26 +1,27 @@
 package com.epam.esm.service.impl;
 
-import com.epam.esm.dao.GiftCertificateDao;
-import com.epam.esm.dao.GiftCertificateTagDao;
-import com.epam.esm.dao.TagDao;
-import com.epam.esm.dao.exception.DaoException;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ServiceException;
+import com.epam.esm.repository.GiftCertificateRepository;
+import com.epam.esm.repository.TagRepository;
 import com.epam.esm.service.GiftCertificateService;
 import com.epam.esm.validator.GiftCertificateValidator;
 import lombok.extern.slf4j.Slf4j;
-import lombok.var;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static com.epam.esm.config.LocalizedMessage.getMessageForLocale;
+import static com.epam.esm.util.LocalizedMessage.getMessageForLocale;
+import static org.springframework.data.domain.Sort.Direction.ASC;
 
 /**
  * The type Gift certificate service.
@@ -29,28 +30,25 @@ import static com.epam.esm.config.LocalizedMessage.getMessageForLocale;
 @Service
 public class GiftCertificateServiceImpl implements GiftCertificateService {
 
-    private final GiftCertificateDao giftCertificateDao;
-    private final TagDao tagDao;
-    private final GiftCertificateTagDao giftCertificateTagDao;
+    private final GiftCertificateRepository giftCertificateRepository;
+    private final TagRepository tagRepository;
     private final GiftCertificateValidator giftCertificateValidator;
 
     /**
      * Instantiates a new Gift certificate service.
      *
-     * @param giftCertificateDao    the gift certificate dao
-     * @param tagDao                the tag dao
-     * @param giftCertificateTagDao the gift certificate tag dao
-     * @param giftCertificateValidator       the custom validator
+     * @param giftCertificateRepository the gift certificate repository
+     * @param tagRepository             the tag repository
+     * @param giftCertificateValidator  the gift certificate validator
      */
-    public GiftCertificateServiceImpl(GiftCertificateDao giftCertificateDao, TagDao tagDao,
-                                      GiftCertificateTagDao giftCertificateTagDao, GiftCertificateValidator giftCertificateValidator) {
-        this.giftCertificateDao = giftCertificateDao;
-        this.tagDao = tagDao;
-        this.giftCertificateTagDao = giftCertificateTagDao;
+    public GiftCertificateServiceImpl(GiftCertificateRepository giftCertificateRepository, TagRepository tagRepository,
+                                      GiftCertificateValidator giftCertificateValidator) {
+        this.giftCertificateRepository = giftCertificateRepository;
+        this.tagRepository = tagRepository;
         this.giftCertificateValidator = giftCertificateValidator;
     }
 
-    private List<GiftCertificate> checkValueListGiftCertificate(List<GiftCertificate> certificateList)
+    private Page<GiftCertificate> checkValueListGiftCertificate(Page<GiftCertificate> certificateList)
             throws ServiceException {
         if (certificateList.isEmpty()){
            printWarnMessage();
@@ -58,12 +56,12 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
         return certificateList;
     }
 
-    private Optional<GiftCertificate> checkValueOptionalGiftCertificate(Optional<GiftCertificate> certificateOptional)
+    private GiftCertificate checkValueOptionalGiftCertificate(Optional<GiftCertificate> certificateOptional)
             throws ServiceException {
         if (!certificateOptional.isPresent()){
             printWarnMessage();
         }
-        return certificateOptional;
+        return certificateOptional.orElse(GiftCertificate.builder().build());
     }
 
     private void printWarnMessage() throws ServiceException {
@@ -79,142 +77,113 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     }
 
     @Override
-    public List<GiftCertificate> findAll() throws ServiceException {
-        try {
-            List<GiftCertificate> certificateList = giftCertificateDao.findAll();
-            return checkValueListGiftCertificate(certificateList);
-        } catch (DaoException e) {
-            throw new ServiceException(e);
-        }
+    public Page<GiftCertificate> findAll(Pageable pageable) throws ServiceException {
+        Page<GiftCertificate> certificateList = giftCertificateRepository.findAll(pageable);
+        return checkValueListGiftCertificate(certificateList);
     }
 
     @Override
-    public List<GiftCertificate> findAllCertificateByTagName(String tagName) throws ServiceException {
-        try {
-            List<GiftCertificate> certificateList = giftCertificateDao.findAllCertificateByTagName(tagName);
-            return checkValueListGiftCertificate(certificateList);
-        } catch (DaoException e) {
-            throw new ServiceException(e);
-        }
+    public Page<GiftCertificate> findAllCertificateByTagName(String tagName, Pageable pageable) throws ServiceException {
+        Page<GiftCertificate> certificateList = giftCertificateRepository.findGiftCertificatesByTagList_Name(tagName, pageable);
+        return checkValueListGiftCertificate(certificateList);
     }
 
     @Override
-    public List<GiftCertificate> findAllCertificateByNameOrDescription(String name, String description) throws ServiceException {
-        try {
-            List<GiftCertificate> certificateList = giftCertificateDao.findAllCertificateByNameOrDescription(name, description);
-            return checkValueListGiftCertificate(certificateList);
-        } catch (DaoException e) {
-            throw new ServiceException(e);
-        }
+    public Page<GiftCertificate> findAllCertificateByNameOrDescription(String name, String description, Pageable pageable) throws ServiceException {
+        Page<GiftCertificate> certificateList = giftCertificateRepository.findAllByNameContainingOrDescriptionContaining(name, description, pageable);
+        return checkValueListGiftCertificate(certificateList);
     }
 
     @Override
-    public List<GiftCertificate> findAllCertificateByDate(String type) throws ServiceException {
+    public Page<GiftCertificate> findAllCertificateByDate(String type, Pageable pageable) throws ServiceException {
         checkType(type);
-        try {
-            List<GiftCertificate> certificateList = giftCertificateDao.findAllCertificateByDate(type);
-            return checkValueListGiftCertificate(certificateList);
-        } catch (DaoException e) {
-            throw new ServiceException(e);
-        }
+        Page<GiftCertificate> certificateList = type.equalsIgnoreCase(ASC.toString()) ?
+                giftCertificateRepository.findAllByOrderByCreateDateAsc(pageable) :
+                giftCertificateRepository.findAllByOrderByCreateDateDesc(pageable);
+        return checkValueListGiftCertificate(certificateList);
     }
 
     @Override
-    public List<GiftCertificate> findAllCertificateByName(String type) throws ServiceException {
-       checkType(type);
-        try {
-            List<GiftCertificate> certificateList = giftCertificateDao.findAllCertificateByName(type);
-            return checkValueListGiftCertificate(certificateList);
-        } catch (DaoException e) {
-            throw new ServiceException(e);
-        }
+    public Page<GiftCertificate> findAllCertificateByName(String type, Pageable pageable) throws ServiceException {
+        checkType(type);
+        Page<GiftCertificate> certificateList = type.equalsIgnoreCase(ASC.toString()) ?
+                giftCertificateRepository.findAllByOrderByNameAsc(pageable) :
+                giftCertificateRepository.findAllByOrderByNameDesc(pageable);
+        return checkValueListGiftCertificate(certificateList);
     }
 
     @Override
-    public Optional<GiftCertificate> findById(long id) throws ServiceException {
-        try {
-            Optional<GiftCertificate> certificateOptional = giftCertificateDao.findById(id);
-            return checkValueOptionalGiftCertificate(certificateOptional);
-        } catch (DaoException e) {
-            throw new ServiceException(e);
+    public Page<GiftCertificate> findAllByTagIdList(String strTagId, Pageable pageable) throws ServiceException {
+        String splitRegex = ",";
+        String[] stringsTagId = strTagId.split(splitRegex);
+        if (!giftCertificateValidator.isTagId(stringsTagId)) {
+            log.warn(getMessageForLocale("incorrect.tag.list"));
+           throw new ServiceException(getMessageForLocale("incorrect.tag.list"));
         }
+        List<Long> idList = new ArrayList<>();
+        Arrays.stream(stringsTagId).forEach(s -> idList.add(Long.valueOf(s)));
+        Page<GiftCertificate> certificateList = giftCertificateRepository.findAllByTagListId(idList, pageable);
+        return checkValueListGiftCertificate(certificateList);
+    }
+
+    @Override
+    public GiftCertificate findById(long id) throws ServiceException {
+        Optional<GiftCertificate> certificateOptional = giftCertificateRepository.findById(id);
+        return checkValueOptionalGiftCertificate(certificateOptional);
     }
 
     @Override
     @Transactional
-    public GiftCertificate create(GiftCertificate giftCertificate) throws ServiceException {
-        long certificateId;
-        try {
-            certificateId = giftCertificateDao.create(giftCertificate);
-        } catch (DaoException e) {
-            throw new ServiceException(e);
+    public GiftCertificate create(GiftCertificate giftCertificate) {
+        LocalDateTime nowTime = LocalDateTime.now();
+        giftCertificate.setCreateDate(nowTime);
+        giftCertificate.setLastUpdateDate(nowTime);
+        for (Tag tag:giftCertificate.getTagList()) {
+             if (!tagRepository.existsByName(tag.getName())){
+                 giftCertificate.getTagList().add(tagRepository.saveAndFlush(tag));
+                 giftCertificate.getTagList().remove(tag);
+             }
         }
-        if (certificateId == 0){
-            log.warn(getMessageForLocale("certificate.not.create"));
-            throw new ServiceException(getMessageForLocale("certificate.not.create"));
-        }
-        List<Long> tagIdList = new ArrayList<>();
-        Optional<Tag> tagOptional;
-        Optional<GiftCertificate> giftCertificateOptional;
-        try {
-            if (giftCertificate.getTagList() == null){
-                log.warn(getMessageForLocale("certificate.not.create"));
-                throw new ServiceException(getMessageForLocale("certificate.not.create"));
-            }
-            for (var i: giftCertificate.getTagList()) {
-                    tagOptional = tagDao.findByName(i.getName());
-                    tagIdList.add(tagOptional.isPresent() ? tagOptional.get().getId() : tagDao.create(i));
-            }
-            if (giftCertificateTagDao.addTagToCertificate(certificateId, tagIdList) == null){
-                log.warn(getMessageForLocale("tag.not.create"));
-                throw new ServiceException(getMessageForLocale("tag.not.create"));
-            }
-            giftCertificateOptional = giftCertificateDao.findById(certificateId);
-        } catch (DaoException e) {
-            throw new ServiceException(e);
-        }
-        return giftCertificateOptional.orElse(new GiftCertificate());
+        return giftCertificateRepository.saveAndFlush(giftCertificate);
     }
 
-    @Transactional
     @Override
-    public Optional<GiftCertificate> updateById(GiftCertificate current) throws ServiceException {
-        Optional<GiftCertificate> updateCertificate;
+    public GiftCertificate updateById(GiftCertificate current) throws ServiceException {
+        GiftCertificate certificate;
         try {
-            if ((current.getName() != null) && !current.getName().isEmpty() ) {
-                giftCertificateDao.updateNameById(current.getName(), current.getId());
+            certificate = giftCertificateRepository.findById(current.getId())
+                    .orElse(GiftCertificate.builder().build());
+            if (giftCertificateValidator.isName(current.getName())) {
+                certificate.setName(current.getName());
             }
-            if ((current.getDescription() != null) && !current.getDescription().isEmpty()) {
-                giftCertificateDao.updateDescriptionById(current.getDescription(), current.getId());
+            if (giftCertificateValidator.isDescription(current.getDescription())) {
+                certificate.setDescription(current.getDescription());
             }
             if (current.getDuration() > 0) {
-                giftCertificateDao.updateDurationById(current.getDuration(), current.getId());
+                certificate.setDuration(current.getDuration());
             }
-            if (current.getPrice().compareTo(BigDecimal.ZERO) > 0) {
-                giftCertificateDao.updatePriceById(current.getPrice(), current.getId());
+            if (current.getPrice() != null && current.getPrice().compareTo(BigDecimal.ZERO) > 0) {
+                certificate.setPrice(current.getPrice());
             }
             if ((current.getTagList() != null) && !(current.getTagList().isEmpty()) ){
-                for (var i : current.getTagList()) {
-                    giftCertificateTagDao.addTagToCertificate(current.getId(), Collections.singletonList(tagDao.create(i)));
-                }
+                certificate.setTagList(current.getTagList());
             }
-            updateCertificate = giftCertificateDao.findById(current.getId());
-        } catch (DaoException e) {
-            throw new ServiceException(e);
+            return giftCertificateRepository.saveAndFlush(certificate);
+        } catch (Exception e){
+            log.warn(getMessageForLocale("certificate.not.update"), e);
+            throw new ServiceException(getMessageForLocale("certificate.not.update") + e);
         }
-        return updateCertificate;
+
     }
 
     @Override
     public boolean removeById(long id) throws ServiceException {
         try {
-            if (giftCertificateDao.removeById(id)){
-                return true;
-            }
-            log.warn(getMessageForLocale("certificate.not.delete"));
-            throw new ServiceException(getMessageForLocale("certificate.not.delete"));
-        } catch (DaoException e) {
-            throw new ServiceException(e);
+            giftCertificateRepository.deleteById(id);
+            return true;
+        } catch (Exception e) {
+            log.warn(getMessageForLocale("certificate.not.delete") + id, e);
+            throw new ServiceException(getMessageForLocale("certificate.not.delete") + id + e);
         }
     }
 }
