@@ -39,14 +39,14 @@ public class TagController {
      */
     @GetMapping()
     public ResponseEntity<List<Tag>> findAll() throws ControllerException {
-        List<Tag> tagList = null;
+        List<Tag> tagList;
         try {
             tagList = tagService.findAll();
         } catch (ServiceException e) {
             throw new ControllerException(e);
         }
         return tagList.isEmpty() ? ResponseEntity.notFound().build() :
-                ResponseEntity.status(HttpStatus.FOUND).body(tagList);
+                ResponseEntity.status(HttpStatus.OK).body(tagList);
     }
 
     /**
@@ -58,7 +58,7 @@ public class TagController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<Tag> findById(@PathVariable long id) throws ControllerException {
-        Optional<Tag> tag = null;
+        Optional<Tag> tag;
         try {
             tag = tagService.findById(id);
         } catch (ServiceException e) {

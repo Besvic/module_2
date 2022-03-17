@@ -3,7 +3,8 @@ package com.epam.esm.dao.impl;
 import com.epam.esm.dao.GiftCertificateDao;
 import com.epam.esm.dao.exception.DaoException;
 import com.epam.esm.entity.GiftCertificate;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -19,92 +20,61 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import static com.epam.esm.database.Messages.getMessageForLocale;
+import static com.epam.esm.config.LocalizedMessage.getMessageForLocale;
 
 /**
  * The type Gift certificate dao.
  */
 @Repository
+@PropertySource("classpath:sql_gift_certificate.properties")
 public class GiftCertificateDaoImpl implements GiftCertificateDao {
 
     private static final String ASC = "asc";
 
-    private static final String SQL_FIND_ALL = "" +
-            "select id, create_date, description, last_update_date, duration, name, price\n" +
-            "from gift_certificate\n" +
-            "where status = 'active'\n" +
-            "order by name";
+    @Value("${find.all.certificate}")
+    private String SQL_FIND_ALL;
 
-    private static final String SQL_SORT_BY_NAME_ASC = "select id, create_date, description, last_update_date, " +
-            "duration, name, price\n" +
-            "from gift_certificate\n" +
-            "where status = 'active'\n" +
-            "order by name asc;";
+    @Value("${sort.name.asc}")
+    private String SQL_SORT_BY_NAME_ASC;
 
-    private static final String SQL_SORT_BY_NAME_DESC = "select id, create_date, description, last_update_date, " +
-            "duration, name, price\n" +
-            "from gift_certificate\n" +
-            "where status = 'active'\n" +
-            "order by name desc;";
+    @Value("${sort.name.desc}")
+    private String SQL_SORT_BY_NAME_DESC;
 
-    private static final String SQL_SORT_BY_CREATE_DATE_ASC = "select id, create_date, description, last_update_date, " +
-            "duration, name, price\n" +
-            "from gift_certificate\n" +
-            "where status = 'active'\n" +
-            "order by create_date asc;";
+    @Value("${sort.create.date.asc}")
+    private String SQL_SORT_BY_CREATE_DATE_ASC;
 
-    private static final String SQL_SORT_BY_CREATE_DATE_DESC = "select id, create_date, description, last_update_date, " +
-            "duration, name, price\n" +
-            "from gift_certificate\n" +
-            "where status = 'active'\n" +
-            "order by create_date desc;";
+    @Value("${sort.create.date.desc}")
+    private String SQL_SORT_BY_CREATE_DATE_DESC;
 
-    private static final String SQL_FIND_BY_ID =
-            "select id, create_date, description, last_update_date, duration, name, price\n" +
-            "from gift_certificate " +
-            "where id = ? and status = 'active'";
+    @Value("${find.id.certificate}")
+    private String SQL_FIND_BY_ID;
 
-    private static final String SQL_INSERT = "insert into gift_certificate (create_date, description, duration, " +
-            "last_update_date, name, price)" +
-            "values (?, ? ,?, ?, ?, ?);";
+    @Value("${insert.certificate}")
+    private String SQL_INSERT;
 
-    private static final String SQL_UPDATE_NAME = "update gift_certificate\n" +
-            "set name = ?\n" +
-            "where id = ?;";
+    @Value("${update.name}")
+    private String SQL_UPDATE_NAME;
 
-    private static final String SQL_UPDATE_DESCRIPTION = "update gift_certificate\n" +
-            "set description = ?\n" +
-            "where id = ?;";
+    @Value("${update.description}")
+    private String SQL_UPDATE_DESCRIPTION;
 
-    private static final String SQL_UPDATE_DURATION = "update gift_certificate\n" +
-            "set duration = ?\n" +
-            "where id = ?;";
+    @Value("${update.duration}")
+    private String SQL_UPDATE_DURATION;
 
-    private static final String SQL_UPDATE_PRICE = "update gift_certificate\n" +
-            "set price = ?\n" +
-            "where id = ?;";
+    @Value("${update.price}")
+    private String SQL_UPDATE_PRICE;
 
-    private static final String SQL_UPDATE_LAST_UPDATE_DATE = "update gift_certificate\n" +
-            "set last_update_date = ?\n" +
-            "where id = ?;";
+    @Value("${update.last.update.date}")
+    private String SQL_UPDATE_LAST_UPDATE_DATE;
 
-    private static final String SQL_REMOVE = "update gift_certificate\n" +
-            "set status = 'delete'\n" +
-            "where id = ?;";
+    @Value("${remove}")
+    private String SQL_REMOVE;
 
-    private static final String SQL_FIND_ALL_BY_TAG_NAME = "select gc.id, gc.create_date, gc.description, gc.duration," +
-            " gc.last_update_date, gc.name, gc.price\n" +
-            "from tag\n" +
-            "join gift_certification_tag gct on tag.id = gct.id_tag\n" +
-            "join gift_certificate gc on gct.id_gift_certification = gc.id\n" +
-            "where tag.name like ? and gc.status = 'active' and tag.status = 'active'\n" +
-            "order by tag.name;";
+    @Value("${find.all.tag.name}")
+    private String SQL_FIND_ALL_BY_TAG_NAME;
 
-    private static final String SQL_FIND_ALL_BY_NAME_OR_DESCRIPTION = "select id, create_date, description, duration, " +
-            "last_update_date, name, price\n" +
-            "from gift_certificate\n" +
-            "where status = 'active' and (name like ? or description like ?)\n" +
-            "order by name;";
+    @Value("${find.all.name.description}")
+    private String SQL_FIND_ALL_BY_NAME_OR_DESCRIPTION;
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -113,7 +83,6 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
      *
      * @param jdbcTemplate the jdbc template
      */
-    @Autowired
     public GiftCertificateDaoImpl(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
