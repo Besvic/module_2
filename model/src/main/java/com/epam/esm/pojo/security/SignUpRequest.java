@@ -26,5 +26,4 @@ public class SignUpRequest {
     private String email;
     private String password;
     private List<String> roleList = new ArrayList<>();
-
 }
