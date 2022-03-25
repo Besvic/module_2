@@ -10,12 +10,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
@@ -32,12 +33,18 @@ class UserServiceImplTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
+
     @InjectMocks
     private UserServiceImpl userService;
 
     @Test
     void create() throws ServiceException {
-        User user = User.builder().build();
+        User user = User.builder()
+                .password("pass")
+                .build();
+        when(bCryptPasswordEncoder.encode("pass")).thenReturn("pass");
         when(userRepository.save(user)).thenReturn(user);
         User actual = userService.create(user);
         assertEquals(user, actual);
@@ -45,7 +52,10 @@ class UserServiceImplTest {
 
     @Test
     void createThrowRuntimeException() {
-        User user = User.builder().build();
+        User user = User.builder()
+                .password("pass")
+                .build();
+        when(bCryptPasswordEncoder.encode("pass")).thenReturn("pass");
         when(userRepository.save(user)).thenThrow(RuntimeException.class);
         assertThrows(ServiceException.class, () -> userService.create(user));
     }
