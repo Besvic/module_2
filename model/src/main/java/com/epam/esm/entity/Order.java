@@ -42,7 +42,8 @@ public class Order implements Serializable {
     @JoinColumn(name = "user_id")
     private User user = User.builder().build();
 
-    @OneToMany(mappedBy = "order", cascade = {CascadeType.MERGE, CascadeType.REMOVE})
+    @OneToMany(cascade = {CascadeType.REMOVE, CascadeType.MERGE})
+    @JoinColumn(name = "order_id")
     private List<GiftCertificate> certificateList = new ArrayList<>();
 
     private BigDecimal cost;

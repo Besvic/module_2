@@ -1,6 +1,5 @@
 package com.epam.esm.dto.entity;
 
-import com.epam.esm.util.LocalizedMessage;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -47,6 +46,8 @@ public class UserDTO extends RepresentationModel<UserDTO> implements Serializabl
     @JsonProperty("orderList")
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<OrderLazyDTO> orderLazyDTOList = new ArrayList<>();
+    @JsonProperty("roleList")
+    private List<RoleDTO> roleDTOList = new ArrayList<>();
 
     /**
      * Gets password.

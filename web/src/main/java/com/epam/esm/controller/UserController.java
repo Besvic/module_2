@@ -1,17 +1,17 @@
 package com.epam.esm.controller;
 
-import com.epam.esm.config.MapperUtil;
+import com.epam.esm.util.MapperUtil;
 import com.epam.esm.dto.converter.OrderConverter;
 import com.epam.esm.dto.converter.OrderLazyConverter;
+import com.epam.esm.dto.converter.TagConverter;
 import com.epam.esm.dto.converter.UserConverter;
-import com.epam.esm.dto.entity.OrderDTO;
-import com.epam.esm.dto.entity.OrderLazyDTO;
-import com.epam.esm.dto.entity.UserDTO;
+import com.epam.esm.dto.entity.*;
 import com.epam.esm.entity.Order;
 import com.epam.esm.entity.User;
 import com.epam.esm.exception.ControllerException;
 import com.epam.esm.exception.ServiceException;
 import com.epam.esm.service.OrderService;
+import com.epam.esm.service.TagService;
 import com.epam.esm.service.UserService;
 import lombok.var;
 import org.springframework.data.domain.Page;
@@ -23,6 +23,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -54,6 +55,8 @@ public class UserController {
     private final UserConverter userConverter;
     private final OrderLazyConverter orderLazyConverter;
     private final OrderConverter orderConverter;
+    private final TagConverter tagConverter;
+    private final TagService tagService;
 
     /**
      * Instantiates a new User controller.
@@ -63,13 +66,23 @@ public class UserController {
      * @param userConverter      the user converter
      * @param orderLazyConverter the order lazy converter
      * @param orderConverter     the order converter
+     * @param tagConverter       the tag converter
+     * @param tagService         the tag service
      */
-    public UserController(UserService userService, OrderService orderService, UserConverter userConverter, OrderLazyConverter orderLazyConverter, OrderConverter orderConverter) {
+    public UserController(UserService userService,
+                          OrderService orderService,
+                          UserConverter userConverter,
+                          OrderLazyConverter orderLazyConverter,
+                          OrderConverter orderConverter,
+                          TagConverter tagConverter,
+                          TagService tagService){
         this.userService = userService;
         this.orderService = orderService;
         this.userConverter = userConverter;
         this.orderLazyConverter = orderLazyConverter;
         this.orderConverter = orderConverter;
+        this.tagConverter = tagConverter;
+        this.tagService = tagService;
     }
 
     /**
@@ -83,6 +96,7 @@ public class UserController {
      * @throws ControllerException the controller exception
      */
     @GetMapping()
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<PagedModel<EntityModel<UserDTO>>> findAll(Pageable pageable,
                                             PagedResourcesAssembler<UserDTO> resourcesUserDTO,
                                             PagedResourcesAssembler<OrderDTO> resourcesOrderDTO,
@@ -90,7 +104,8 @@ public class UserController {
         Page<UserDTO> userDTOS;
         PagedModel<EntityModel<UserDTO>> pagedModel;
         try {
-            userDTOS = MapperUtil.convertList(userService.findAll(pageable), userConverter::convertToUserDTO);
+            userDTOS = MapperUtil
+                    .convertList(userService.findAll(pageable), userConverter::convertToUserDTO);
             initializeUserDTOListWithLinks(userDTOS, pageable, resourcesOrderDTO, resourcesOrderLazyDTO);
         } catch (ServiceException e) {
             throw new ControllerException(e);
@@ -112,6 +127,7 @@ public class UserController {
      * @throws ControllerException the controller exception
      */
     @GetMapping("/search/name")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<PagedModel<EntityModel<UserDTO>>> searchByName(@RequestParam(value = "name") String name,
                                             Pageable pageable, PagedResourcesAssembler<UserDTO> resourcesUserDTO,
                                             PagedResourcesAssembler<OrderDTO> resourcesOrderDTO,
@@ -119,7 +135,8 @@ public class UserController {
         Page<UserDTO> userDTOS;
         PagedModel<EntityModel<UserDTO>> pagedModel;
         try {
-            userDTOS = MapperUtil.convertList(userService.findAllByName(name, pageable), userConverter::convertToUserDTO);
+            userDTOS = MapperUtil
+                    .convertList(userService.findAllByName(name, pageable), userConverter::convertToUserDTO);
            initializeUserDTOListWithLinks(userDTOS, pageable, resourcesOrderDTO, resourcesOrderLazyDTO);
         } catch (ServiceException e) {
             throw new ControllerException(e);
@@ -141,6 +158,7 @@ public class UserController {
      * @throws ControllerException the controller exception
      */
     @GetMapping(value = "/{user_id}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<UserDTO> findById(@PathVariable("user_id") long userId,
                         Pageable pageable, PagedResourcesAssembler<OrderDTO> resourcesOrderDTO,
                                             PagedResourcesAssembler<OrderLazyDTO> resourcesOrderLazyDTO) throws ControllerException {
@@ -165,6 +183,7 @@ public class UserController {
      * @throws ControllerException the controller exception
      */
     @PostMapping()
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<UserDTO> create(@RequestBody @Valid UserDTO userDTO,
                                           Pageable pageable, PagedResourcesAssembler<OrderDTO> resourcesOrderDTO,
                                           PagedResourcesAssembler<OrderLazyDTO> resourcesOrderLazyDTO) throws ControllerException {
@@ -189,6 +208,7 @@ public class UserController {
      * @throws ControllerException the controller exception
      */
     @GetMapping(value = "/{user_id}/orders")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<PagedModel<EntityModel<OrderLazyDTO>>> findAllOrderByUserId(@PathVariable(name = "user_id") long userId,
                                     Pageable pageable, PagedResourcesAssembler<OrderLazyDTO> resourcesOrderLazyDTO,
                                     PagedResourcesAssembler<OrderDTO> resourcesOrderDTO) throws ControllerException {
@@ -196,7 +216,9 @@ public class UserController {
         Page<OrderLazyDTO> orderDTOS;
         PagedModel<EntityModel<OrderLazyDTO>> pagedModel;
         try {
-            orderDTOS = MapperUtil.convertList(orderService.findAllByUserId(userId, pageable), orderLazyConverter::convertToOrderDTO);
+            orderDTOS = MapperUtil
+                    .convertList(orderService.findAllByUserId(userId, pageable),
+                            orderLazyConverter::convertToOrderDTO);
             for (var i: orderDTOS) {
                 i.add(linkTo(methodOn(OrderController.class).findById(i.getId())).withRel(order).withType(HttpMethod.GET.name()));
             }
@@ -208,6 +230,26 @@ public class UserController {
         return new ResponseEntity<>(pagedModel, HttpStatus.OK);
     }
 
+    /**
+     * Search mostly used tag by order price response entity.
+     *
+     * @param userId the user id
+     * @return the response entity
+     * @throws ControllerException the controller exception
+     */
+    @GetMapping(value = "/{user_id}/tags/search")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public ResponseEntity<TagDTO> searchMostlyUsedTagByOrderPrice(@PathVariable("user_id") long userId)
+            throws ControllerException {
+        TagDTO tagDTO;
+        try {
+            tagDTO = tagConverter.convertToTagDTO(tagService.findAllMostlyUsedTagByOrderPrice(userId));
+            initializeTagDTOWithLink(tagDTO);
+        } catch (ServiceException e) {
+            throw new ControllerException(e);
+        }
+        return new ResponseEntity<>(tagDTO, HttpStatus.OK);
+    }
 
     /**
      * Create order response entity.
@@ -218,6 +260,7 @@ public class UserController {
      * @throws ControllerException the controller exception
      */
     @PostMapping(value = "/{user_id}/orders")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<OrderDTO> createOrder(@RequestBody OrderDTO orderDTO,
                                              @PathVariable(name = "user_id") long userId) throws ControllerException {
         orderDTO.getUserDTO().setId(userId);
@@ -239,6 +282,7 @@ public class UserController {
      * @throws ControllerException the controller exception
      */
     @DeleteMapping(value = "/{user_id}")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<Long> deleteById(@PathVariable("user_id") long userId) throws ControllerException {
         try {
             return new ResponseEntity<>(userService.deleteById(userId), HttpStatus.OK);
@@ -252,11 +296,7 @@ public class UserController {
                                                 PagedResourcesAssembler<OrderLazyDTO> resourcesOrderLazyDTO) throws ControllerException {
         String order = "order";
         for (var i: userDTOS) {
-            i.add(linkTo(methodOn(UserController.class).findById(i.getId(), pageable, resourcesOrderDTO, resourcesOrderLazyDTO)).withSelfRel().withType(HttpMethod.GET.name()))
-                    .add(linkTo(methodOn(UserController.class).deleteById(i.getId())).withSelfRel().withType(HttpMethod.DELETE.name()))
-                    .add(linkTo(methodOn(UserController.class).findAllOrderByUserId(i.getId(), pageable, resourcesOrderLazyDTO, resourcesOrderDTO)).withRel(order).withType(HttpMethod.GET.name()))
-                    .add(linkTo(methodOn(UserController.class).createOrder(new OrderDTO(), i.getId())).withSelfRel().withType(HttpMethod.POST.name()));
-            initializeOrderDTOListWithLinks(i.getOrderLazyDTOList());
+            linksForUserDTO(pageable, resourcesOrderDTO, resourcesOrderLazyDTO, order, i);
         }
     }
 
@@ -270,11 +310,15 @@ public class UserController {
     private void initializeUserDTOWithLinks(UserDTO userDTO, Pageable pageable, PagedResourcesAssembler<OrderLazyDTO> resourcesOrderLazyDTO,
                                             PagedResourcesAssembler<OrderDTO> resourcesOrderDTO) throws ControllerException {
         String order = "order";
-        userDTO.add(linkTo(methodOn(UserController.class).findById(userDTO.getId(), pageable, resourcesOrderDTO, resourcesOrderLazyDTO)).withSelfRel().withType(HttpMethod.GET.name()))
-                .add(linkTo(methodOn(UserController.class).deleteById(userDTO.getId())).withSelfRel().withType(HttpMethod.DELETE.name()))
-                .add(linkTo(methodOn(UserController.class).findAllOrderByUserId(userDTO.getId(),pageable, resourcesOrderLazyDTO, resourcesOrderDTO)).withRel(order).withType(HttpMethod.GET.name()))
-                .add(linkTo(methodOn(UserController.class).createOrder(new OrderDTO(), userDTO.getId())).withSelfRel().withType(HttpMethod.POST.name()));
-        initializeOrderDTOListWithLinks(userDTO.getOrderLazyDTOList());
+        linksForUserDTO(pageable, resourcesOrderDTO, resourcesOrderLazyDTO, order, userDTO);
+    }
+
+    private void linksForUserDTO(Pageable pageable, PagedResourcesAssembler<OrderDTO> resourcesOrderDTO, PagedResourcesAssembler<OrderLazyDTO> resourcesOrderLazyDTO, String order, UserDTO i) throws ControllerException {
+        i.add(linkTo(methodOn(UserController.class).findById(i.getId(), pageable, resourcesOrderDTO, resourcesOrderLazyDTO)).withSelfRel().withType(HttpMethod.GET.name()))
+                .add(linkTo(methodOn(UserController.class).deleteById(i.getId())).withSelfRel().withType(HttpMethod.DELETE.name()))
+                //.add(linkTo(methodOn(UserController.class).findAllOrderByUserId(i.getId(), pageable, resourcesOrderLazyDTO, resourcesOrderDTO)).withRel(order).withType(HttpMethod.GET.name()))
+                .add(linkTo(methodOn(UserController.class).createOrder(new OrderDTO(), i.getId())).withSelfRel().withType(HttpMethod.POST.name()));
+        initializeOrderDTOListWithLinks(i.getOrderLazyDTOList());
     }
 
     private void initializePageModel(PagedModel<EntityModel<UserDTO>> pagedModel) {
@@ -282,6 +326,11 @@ public class UserController {
                 .add(linkTo(UserController.class).withSelfRel().withType(HttpMethod.POST.name()))
                 .add(linkTo(UserController.class).slash("/search/name?name=name").withSelfRel().withType(HttpMethod.GET.name()));
 
+    }
+
+    private void initializeTagDTOWithLink(TagDTO tagDTO) throws ControllerException {
+        tagDTO.add(linkTo(methodOn(TagController.class).findById(tagDTO.getId())).withSelfRel().withType(HttpMethod.GET.name()))
+                .add(linkTo(methodOn(TagController.class).remove(tagDTO.getId())).withSelfRel().withType(HttpMethod.DELETE.name()));
     }
 
 }

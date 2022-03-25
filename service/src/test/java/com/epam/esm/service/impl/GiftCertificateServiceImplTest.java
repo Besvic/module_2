@@ -68,7 +68,7 @@ class GiftCertificateServiceImplTest {
     @Test
     void findAllCertificateByTagName() throws ServiceException {
         String str = "str";
-        when(certificateRepository.findGiftCertificatesByTagList_Name(str, pageable)).thenReturn(certificatePage);
+        when(certificateRepository.findGiftCertificatesByTagListName(str, pageable)).thenReturn(certificatePage);
         Page<GiftCertificate> expected = certificatePage;
         Page<GiftCertificate> actual = certificateService.findAllCertificateByTagName(str, pageable);
         assertEquals(expected, actual);
@@ -203,6 +203,8 @@ class GiftCertificateServiceImplTest {
                 .price(BigDecimal.valueOf(1))
                 .tagList(Collections.singletonList(new Tag(1L, "name")))
                 .build();
+        when(validator.isName(certificate.getName())).thenReturn(true);
+        when(validator.isDescription(certificate.getDescription())).thenReturn(true);
         when(certificateRepository.findById(1L)).thenReturn(Optional.of(GiftCertificate.builder().id(1L).build()));
         when(certificateRepository.saveAndFlush(certificate)).thenReturn(certificate);
         GiftCertificate actual = certificateService.updateById(certificate);
@@ -232,7 +234,7 @@ class GiftCertificateServiceImplTest {
 
     @Test
     void removeByIdThrowRuntimeException() {
-        doThrow(ServiceException.class).when(certificateRepository).deleteById(anyLong());
+        doThrow(RuntimeException.class).when(certificateRepository).deleteById(1L);
         assertThrows(ServiceException.class, () -> certificateService.removeById(anyLong()));
     }
 }

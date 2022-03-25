@@ -1,5 +1,6 @@
 package com.epam.esm.service.impl;
 
+import com.epam.esm.pojo.security.ERole;
 import com.epam.esm.repository.GiftCertificateRepository;
 import com.epam.esm.repository.OrderRepository;
 import com.epam.esm.repository.UserRepository;
@@ -7,11 +8,16 @@ import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Order;
 import com.epam.esm.entity.User;
 import com.epam.esm.exception.ServiceException;
+import com.epam.esm.security.UserDetailsImpl;
 import com.epam.esm.service.OrderService;
 import lombok.extern.log4j.Log4j2;
 import lombok.var;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,7 +65,13 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Page<Order> findAllByUserId(long userId, Pageable pageable) throws ServiceException {
-        Page<Order> orderList = orderRepository.findAllByUser_Id(userId, pageable);
+        Page<Order> orderList;
+        if (checkAccessesByUserId(userId)){
+            orderList = orderRepository.findAllByUserId(userId, pageable);
+        }else {
+            log.warn(getMessageForLocale("define.accesses"));
+            throw new ServiceException(getMessageForLocale("define.accesses"));
+        }
         if (orderList.isEmpty()){
             log.warn(getMessageForLocale("order.not.found.by.user.id") + userId);
             throw new ServiceException(getMessageForLocale("order.not.found.by.user.id") + userId);
@@ -69,12 +81,28 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Order findById(long orderId) throws ServiceException {
-        Optional<Order> orderOptional = orderRepository.findById(orderId);
+        Optional<Order> orderOptional;
+        if (checkAccessesByOrderId(orderId)){
+            orderOptional = orderRepository.findById(orderId);
+        }else{
+            log.warn(getMessageForLocale("define.accesses"));
+            throw new ServiceException(getMessageForLocale("define.accesses"));
+        }
         if (orderOptional.isPresent()){
             return orderOptional.get();
         }
         log.warn(getMessageForLocale("order.not.found.by.id") + orderId);
         throw new ServiceException(getMessageForLocale("order.not.found.by.id") + orderId);
+    }
+
+    private boolean checkAccessesByOrderId(long orderId) throws ServiceException {
+        UserDetailsImpl userDetails = getUserDetails();
+
+        GrantedAuthority roleUser = new SimpleGrantedAuthority(ERole.ROLE_USER.name());
+        GrantedAuthority roleAdmin = new SimpleGrantedAuthority(ERole.ROLE_ADMIN.name());
+        return userDetails.getAuthorities().contains(roleAdmin) ||
+                (userDetails.getAuthorities().contains(roleUser) &&
+                        orderRepository.existsByIdAndUserId(orderId, userDetails.getId()));
     }
 
     @Override
@@ -108,6 +136,35 @@ public class OrderServiceImpl implements OrderService {
             throw new ServiceException(getMessageForLocale("insufficient.funds.balance"));
         }
         userOptional.get().setBalance(userOptional.get().getBalance().subtract(cost));
-        return orderRepository.saveAndFlush(order);
+        if (checkAccessesByUserId(order.getUser().getId())){
+            return orderRepository.saveAndFlush(order);
+        }else{
+            log.warn(getMessageForLocale("define.accesses"));
+            throw new ServiceException(getMessageForLocale("define.accesses"));
+        }
     }
+
+
+    private boolean checkAccessesByUserId(long userId) throws ServiceException {
+        UserDetailsImpl userDetails = getUserDetails();
+        GrantedAuthority roleUser = new SimpleGrantedAuthority(ERole.ROLE_USER.name());
+        GrantedAuthority roleAdmin = new SimpleGrantedAuthority(ERole.ROLE_ADMIN.name());
+        return userDetails.getAuthorities().contains(roleAdmin) ||
+                (userDetails.getAuthorities().contains(roleUser) &&
+                        userDetails.getId() == userId);
+    }
+
+    private UserDetailsImpl getUserDetails() throws ServiceException {
+        Object object = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+        if (object instanceof UserDetails){
+            return (UserDetailsImpl) object;
+        }
+        log.error(getMessageForLocale("impossible.cast"));
+        throw new ServiceException(getMessageForLocale("impossible.cast"));
+    }
+
+
 }

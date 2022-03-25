@@ -1,6 +1,6 @@
 package com.epam.esm.dto.converter;
 
-import com.epam.esm.config.MapperUtil;
+import com.epam.esm.util.MapperUtil;
 import com.epam.esm.dto.entity.GiftCertificateDTO;
 import com.epam.esm.entity.GiftCertificate;
 import org.modelmapper.ModelMapper;
@@ -34,7 +34,9 @@ public class GiftCertificateConverter {
      */
     public GiftCertificateDTO convertToGiftCertificateDTO(GiftCertificate giftCertificate){
         GiftCertificateDTO giftCertificateDTO = modelMapper.map(giftCertificate, GiftCertificateDTO.class);
-        giftCertificateDTO.setTagDTOList(MapperUtil.convertList(giftCertificate.getTagList(), tagConverter::convertToTagDTO));
+        giftCertificateDTO.setTagDTOList(
+                MapperUtil.convertList(giftCertificate.getTagList(), tagConverter::convertToTagDTO)
+        );
         return giftCertificateDTO;
     }
 
@@ -46,7 +48,9 @@ public class GiftCertificateConverter {
      */
     public GiftCertificate convertToGiftCertificate(GiftCertificateDTO giftCertificateDTO){
         GiftCertificate giftCertificate = modelMapper.map(giftCertificateDTO, GiftCertificate.class);
-        giftCertificate.setTagList(MapperUtil.convertList(giftCertificateDTO.getTagDTOList(), tagConverter::converterToTag));
+        giftCertificate.setTagList(
+                MapperUtil.convertList(giftCertificateDTO.getTagDTOList(), tagConverter::converterToTag)
+        );
         return giftCertificate;
     }
 }

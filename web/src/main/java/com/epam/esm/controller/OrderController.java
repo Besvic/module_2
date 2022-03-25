@@ -1,6 +1,6 @@
 package com.epam.esm.controller;
 
-import com.epam.esm.config.MapperUtil;
+import com.epam.esm.util.MapperUtil;
 import com.epam.esm.dto.converter.OrderConverter;
 import com.epam.esm.dto.entity.GiftCertificateDTO;
 import com.epam.esm.dto.entity.OrderDTO;
@@ -18,6 +18,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -46,7 +47,8 @@ public class OrderController {
      * @param orderService   the order service
      * @param orderConverter the order converter
      */
-    public OrderController(OrderService orderService, OrderConverter orderConverter) {
+    public OrderController(OrderService orderService,
+                           OrderConverter orderConverter) {
         this.orderService = orderService;
         this.orderConverter = orderConverter;
     }
@@ -59,12 +61,14 @@ public class OrderController {
      * @return the response entity
      * @throws ControllerException the controller exception
      */
-    @GetMapping
+    @GetMapping()
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<PagedModel<EntityModel<OrderDTO>>> findAll(Pageable pageable, PagedResourcesAssembler<OrderDTO> resourcesAssembler) throws ControllerException {
         Page<OrderDTO> orderDTOS;
         PagedModel<EntityModel<OrderDTO>> pagedModel;
         try {
-            orderDTOS = MapperUtil.convertList(orderService.findAll(pageable), orderConverter::convertToOrderDTO);
+            orderDTOS = MapperUtil
+                    .convertList(orderService.findAll(pageable), orderConverter::convertToOrderDTO);
             for (var i : orderDTOS) {
                 i.add(linkTo(methodOn(OrderController.class).findById(i.getId())).withSelfRel().withType(HttpMethod.GET.name()));
                 initializeCertificateDTOList(i.getCertificateDTOList());
@@ -84,6 +88,7 @@ public class OrderController {
      * @throws ControllerException the controller exception
      */
     @GetMapping("/{order_id}")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<OrderDTO> findById(@PathVariable("order_id") long orderId) throws ControllerException {
         OrderDTO orderDTO;
         try {
@@ -104,7 +109,7 @@ public class OrderController {
     }
 
     private void initializeTagDTOListWithLink(List<TagDTO> tagDTOPage) throws ControllerException {
-        final String tag = "tag";
+        String tag = "tag";
         for (var i: tagDTOPage) {
             i.add(linkTo(methodOn(TagController.class).findById(i.getId())).withRel(tag).withType(HttpMethod.GET.name()))
                     .add(linkTo(methodOn(TagController.class).remove(i.getId())).withRel(tag).withType(HttpMethod.DELETE.name()));

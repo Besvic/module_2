@@ -21,7 +21,7 @@ public interface GiftCertificateRepository extends JpaRepository<GiftCertificate
      * @param pageable the pageable
      * @return the page
      */
-    Page<GiftCertificate> findGiftCertificatesByTagList_Name(String tagName, Pageable pageable);
+    Page<GiftCertificate> findGiftCertificatesByTagListName(String tagName, Pageable pageable);
 
     /**
      * Find all by name containing or description containing page.
