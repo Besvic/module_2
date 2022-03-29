@@ -68,6 +68,7 @@ class OrderServiceImplTest {
         assertThrows(ServiceException.class, () -> orderService.findAll(pageable));
     }
 
+
     /*@Test
     @WithMockUser(roles = "ROLE_ADMIN")
 //    @WithUserDetails()
